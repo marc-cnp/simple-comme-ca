@@ -1,0 +1,69 @@
+API Banking
+v0.1 - 04/2021
+
+Introduction Accès et format Authentification
+Requête Réponse Utilisation du token Resources Base URL
+v0.1 - 04/2021
+
+Introduction
+Ce document décrit le mode d'emploi des endpoints API suivants :  Création d'un compte bancaire (CFONB)  Import du fichier CFONB
+Accès et format
+Chiffrement et signature des données La communication avec l'API utilise le protocole de chiffrement TLS, l'usage de Https est obligatoire. Authentification L'accès à l'API est protégé et restreint aux utilisateurs authentifiés auprès du serveur d'identité Inqom. L'authentification s'effectue par l'intermédiaire d'un identifiant/mot de passe. Un « Client Api » permettra au CLIENT de récupérer un jeton de type JWT qui sera ensuite véhiculé dans les entêtes Http. Protocole de communication L'API est basée sur le protocole Https.
+v0.1 - 04/2021
+
+Authentification
+
+L'authentification se fait selon le protocole Oauth2. Pour pouvoir appeler les autres endpoints contenus dans ce document, il est nécessaire au préalable de récupérer un token d'authentification depuis l'endpoint suivant.
+
+Requête
+URL - Prod: https://auth.inqom.com/identity/connect/token - Recette: https://auth-staging.inqom.com/identity/connect/token
+Method POST
+Paramètres Ces champs sont à passer dans le corps de la requête avec un contentType x-www-form-urlencoded
+
+Nom du champ username password grant_type scope client_id client_secret
+
+Description adresse mail du compte d'accès mot de passe du compte d'accès "password" (tel quel) "openid apidata" (tel quel) l'id de votre client API le secret de votre client API
+
+Il faudra s'assurer que l'utilisateur en question a bien des droits de lecture sur les dossiers sur lesquels on souhaite faire des requêtes..
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Corps Nom du champ access_token
+
+Description Token d'authentification
+
+Utilisation du token
+Pour tous les endpoints suivants, il est nécessaire de passer en paramètre le token d'authentification récupéré depuis l'API d'authentification décrit ci-dessus. Le token se passe dans l'entête de chaque requête avec le préfixe Bearer :
+Authorization: Bearer <TokenJWT>
+Resources
+Base URL
+- Prod : https://wa-fred-banking-prod.azurewebsites.net - Recette : https://wa-fred-banking-staging.azurewebsites.net
+
+v0.1 - 04/2021
+
+Ajout d'un compte bancaire "CFONB" Request URL {{URLBase}}/api/app/banking/enterprises/{dossierId}/manual/ebics/accounts Method POST Paramètres path
+
+Nom du champ dossierId *
+Paramètres body
+
+Format int
+
+Description Id du dossier dans Inqom
+
+Nom du champ Iban BankName IsCfonbControlActive
+
+Format String String Booléen
+
+Description Iban Nom de la banque Activation du control d'IBAN
+
+Import d'un fichier CFONB Request URL {{URLBase}}/api/app/banking/ebics/accounts/import Method POST Paramètres (formData)
+
+Nom du champ file
+
+Description Fichier Cfonb
+
+v0.1 - 04/2021
+
+

@@ -1,0 +1,226 @@
+API Accounting Documents
+v0.1 - 04/2021
+
+Introduction Accès et format Authentification
+Requête Réponse Utilisation du token Resources Base URL Documents Requête Réponse Exemple Requête Notes de frais Requête Réponse Erreurs et Status codes
+v0.1 - 04/2021
+
+Introduction
+Ce document décrit le mode d'emploi des endpoints API suivants :  création/récupération d'une facture d'achat / facture de vente  création/récupération d'une note de frais
+Accès et format
+Chiffrement et signature des données La communication avec l'API utilise le protocole de chiffrement TLS, l'usage de Https est obligatoire. Authentification L'accès à l'API est protégé et restreint aux utilisateurs authentifiés auprès du serveur d'identité Inqom. L'authentification s'effectue par l'intermédiaire d'un identifiant/mot de passe. Un « Client Api » permettra au CLIENT de récupérer un jeton de type JWT qui sera ensuite véhiculé dans les entêtes Http. Protocole de communication L'API est basée sur le protocole Https.
+v0.1 - 04/2021
+
+Authentification
+
+L'authentification se fait selon le protocole Oauth2. Pour pouvoir appeler les autres endpoints contenus dans ce document, il est nécessaire au préalable de récupérer un token d'authentification depuis l'endpoint suivant.
+
+Requête
+URL - Prod: https://auth.inqom.com/identity/connect/token - Recette: https://staging-auth.inqom.com/identity/connect/token
+Method POST
+Paramètres Ces champs sont à passer dans le corps de la requête avec un contentType x-www-form-urlencoded
+
+Nom du champ username password grant_type scope client_id client_secret
+
+Description adresse mail du compte d'accès mot de passe du compte d'accès "password" (tel quel) "openid apidata" (tel quel) l'id de votre client API le secret de votre client API
+
+Il faudra s'assurer que l'utilisateur en question a bien des droits de lecture sur les dossiers sur lesquels on souhaite faire des requêtes..
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Corps Nom du champ access_token
+
+Description Token d'authentification
+
+Utilisation du token
+Pour tous les endpoints suivants, il est nécessaire de passer en paramètre le token d'authentification récupéré depuis l'API d'authentification décrit ci-dessus. Le token se passe dans l'entête de chaque requête avec le préfixe Bearer :
+Authorization: Bearer <TokenJWT>
+
+Resources
+Base URL
+- Prod : https://wa-fred-accounting-documents-prod.azurewebsites.net - Recette :https://wa-fred-accounting-documents-staging.azurewebsites.net
+Documents
+. Une pièce comptable dans Inqom. L'endpoint suivant permet de récupérer une pièce par son Identifiant {id} pour un dossier ayant l'identifiant {accountingFolderId}
+
+Requête
+
+URL
+{{URLBase}}/api/accounting-documents/accounting-folders/{accountingFolderId}/Documen ts/{id}
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du dossier dans Inqom
+
+v0.1 - 04/2021
+
+id
+
+Id de la pièce dans Inqom
+
+Réponse
+Content-type application/json; charset=utf-8
+Response Body
+Nom du champ Id AccountingFolderId* Name Type*
+Size* OrigineId
+DeletedAt CreatedAt* Source SourceId ClientSource DocRef Checksum Status*
+StatusReason StatusUpdatedAt StatusResponsibleUserId FileUrl ThumbUrl GoogleJsonUrl OwnerId* FolderItemId OriginalName ContentSource*
+StatusReasons
+
+Description
+Id de la pièce ID du dossier Nome de la pièce Client (pour une facture de vente), Supplier (pour une facture d'achat) Others (pour Autre) la taille en ko l'id de la pièce initiale si celle si en est une dupliquée la date de suppression de la pièce la date de créationde la pièce La source L'id source
+string string string le statut, un de [Received, ToReview, Processing, Duplicate, Done, ManualProcessing, Deleted] la raison du statut la date de la mise à jour du statut l'id de l'utilisateur qui a mis à jour le statut l'url de la pièce (non accessible) l'url de l'aperçu de la pièce l'url de l'extraction json l'id de l'utilisateur qui a chargé la pièce plus utilisé le nom du fichier lors de son dépôt string une de [DocData, Invoice] la raison du statut, une de [ None, ExerciseLockedForDates, ExercisesNotFound,
+
+v0.1 - 04/2021
+
+Nom du champ Id AccountingFolderId* Name Type*
+Size* OrigineId
+DeletedAt CreatedAt* Source SourceId ClientSource DocRef Checksum Status*
+StatusReason StatusUpdatedAt
+CounterParty Amount EffectifDate UserDefinedThirdPartyName
+Exemple
+
+Description
+Id de la pièce ID du dossier Nome de la pièce Client (pour une facture de vente), Supplier (pour une facture d'achat) Others (pour Autre) la taille en ko l'id de la pièce initiale si celle si en est une dupliquée la date de suppression de la pièce la date de créationde la pièce La source L'id source
+string string string le statut, un de [Received, ToReview, Processing, Duplicate, Done, ManualProcessing, Deleted] la raison du statut la date de la mise à jour du statut CannotCreateEntriesBeforeFirstOpennedE xercise, SituationNotImpactable, InsertEntryIsForbidden, JournalNotFound, UserManuallyUnsetDuplicate, BookEntriesDeletedByUser] la contrepartie de la pièce le montant TTC extrait de la pièce la date de l'écriture extraite de la pièce le nom du bénéficiaire (pour les notes de frais)
+
+v0.1 - 04/2021
+
+[ { "Id": 9518529, "AccountingFolderId": 11287, "Name": "Facture_FR55104451.pdf", "Type": "Supplier", "Size": 40, "OrigineId": 8713438, "CreatedAt": "2023-03-24T17:05:21.38Z", "Source": "Api", "ClientSource": "Web", "Checksum": "C9FED3D6F2B5FA510A25423BD86F6AE95A1F6DD6", "Status": "Duplicate", "StatusUpdatedAt": "2023-03-24T17:05:24.34Z", "StatusResponsibleUserId": 250, "FileUrl":
+"https://fredprodstorage.blob.core.windows.net/enterprises/96cec561bb4b43cb996da37339a4f 1c4/facture_fr55104451-3388f7418d8f4639ac9d80fab91f1788.pdf",
+"ThumbUrl": "https://fredprodstorage.blob.core.windows.net/enterprisespublic/96cec561bb4b43cb996da37 339a4f1c4/facture_fr55104451-3388f7418d8f4639ac9d80fab91f1788-thumb-b521531853614474bdce d1e03e3e5c5b.png",
+"OwnerId": 7498, "OriginalName": "Facture_FR55104451.pdf", "ContentSource": "DocData" }  ]
+
+Requête
+
+URL
+{{URLBase}}/api/accounting-documents/accounting-folders/{accountingFolderId}/Documen ts/
+
+Method POST
+
+Paramètres (Form-Data)
+
+Nom du champ accountingFolderId TypeScan
+
+Description
+Id du dossier dans Inqom
+Client (pour une facture de vente), Supplier (pour une facture d'achat), Others (pour rattacher lors d'un import FEC)
+
+v0.1 - 04/2021
+
+FileSource Document DocRef SourceId WithoutWorkflow
+DocumentName
+
+Api
+la pièce jointe
+Une référence si voulue
+Id de la pièce dans son système d'origine
+"true" si pas besoin de passer par le chemin d'extraction des données de la pièce par le modèle IA
+Nom du fichier
+
+Response Body
+Nom du champ Id AccountingFolderId* Name Type*
+Size* OrigineId
+DeletedAt CreatedAt* Source SourceId ClientSource DocRef Checksum Status*
+StatusReason StatusUpdatedAt StatusResponsibleUserId FileUrl ThumbUrl GoogleJsonUrl OwnerId* FolderItemId
+
+Description
+Id de la pièce ID du dossier Nome de la pièce Client (pour une facture de vente), Supplier (pour une facture d'achat) la taille en ko l'id de la pièce initiale si celle si en est une dupliquée la date de suppression de la pièce la date de créationde la pièce La source L'id source
+string string string le statut, un de [Received, ToReview, Processing, Duplicate, Done, ManualProcessing, Deleted] la raison du statut la date de la mise à jour du statut l'id de l'utilisateur qui a mis à jour le statut l'url de la pièce l'url de l'aperçu de la pièce l'url de l'extraction json l'id de l'utilisateur qui a chargé la pièce plus utilisé
+
+v0.1 - 04/2021
+
+Nom du champ Id AccountingFolderId* Name Type*
+Size* OrigineId
+DeletedAt CreatedAt* Source SourceId ClientSource DocRef Checksum Status*
+StatusReason StatusUpdatedAt OriginalName ContentSource*
+StatusReasons
+CounterParty Amount EffectifDate UserDefinedThirdPartyName
+
+Description
+Id de la pièce ID du dossier Nome de la pièce Client (pour une facture de vente), Supplier (pour une facture d'achat) la taille en ko l'id de la pièce initiale si celle si en est une dupliquée la date de suppression de la pièce la date de créationde la pièce La source L'id source
+string string string le statut, un de [Received, ToReview, Processing, Duplicate, Done, ManualProcessing, Deleted] la raison du statut la date de la mise à jour du statut le nom du fichier lors de son dépôt string une de [DocData, Invoice] la raison du statut, une de [ None, ExerciseLockedForDates, ExercisesNotFound, CannotCreateEntriesBeforeFirstOpennedE xercise, SituationNotImpactable, InsertEntryIsForbidden, JournalNotFound, UserManuallyUnsetDuplicate, BookEntriesDeletedByUser] la contrepartie de la pièce le montant TTC extrait de la pièce la date de l'écriture extraite de la pièce le nom du bénéficiaire (pour les notes de frais)
+
+v0.1 - 04/2021
+
+Notes de frais
+. L'endpoint suivant permet de déposer une note de frais
+
+Requête
+
+URL {{URLBase}}/api/v1/accounting-folders/{accountingFolderId}/expense-bills
+
+Method POST
+
+Paramètres (path) Nom du champ accountingFolderId File BeneficiaryFullName FileNameWithExtension DocumentReference
+
+Description Id du dossier dans Inqom la note de frais en pièce jointe le nom du bénéficiaire le nom du fichier Une référence pour la note
+
+Réponse
+Content-type application/json; charset=utf-8 Response Body
+Nom du champ DocumentId
+
+Description Id de la note de frais
+
+v0.1 - 04/2021
+
+Récupérer le document original
+. L'endpoint suivant permet de récupérer un URL pour télécharger la pièce. NB: l'URL est temporaire et expire au bout de quelques minutes
+
+Requête
+
+URL
+{{URLBase}}/api/accounting-documents/accounting-folders/{accountingFolderId}/Documen ts/{documentId}/public-url
+
+Method GET
+
+Paramètres (path) Nom du champ accountingFolderId documentId
+
+Description Id du dossier dans Inqom Id de la pièce
+
+Réponse
+Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ
+
+Description l'URL pour télécharger la pièce
+
+Erreurs et Status codes
+Chaque requête Http recevra en retour un code de statut indiquant si la requête a pu s'effectuer correctement.
+v0.1 - 04/2021
+
+Les codes de statut sont les suivants
+
+Code 200
+400
+
+Message ok
+bad request
+
+404
+
+not found
+
+403
+
+forbidden
+
+500
+
+server error
+
+Signification
+la requête s'est bien effectuée
+la requête était mal formulée, un message d'erreur complémentaire explique parfois le problème
+l'url utilisée n'existe pas
+l'authentification n'a pas fonctionné. Vérifier si le token obtenu depuis l'endpoint authentification correspond bien à un utilisateur qui a des droits sur les ressources à récupérer
+Erreur côté Inqom - si cela se reproduit veuillez contacter l'équipe
+
+v0.1 - 04/2021
+
+

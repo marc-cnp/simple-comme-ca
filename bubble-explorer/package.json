@@ -1,0 +1,15 @@
+{
+  "name": "bubble-app-explorer",
+  "version": "1.0.0",
+  "description": "Automated Bubble.io application explorer with Playwright",
+  "main": "explorer.js",
+  "scripts": {
+    "explore": "node explorer.js",
+    "explore:headed": "HEADLESS=false node explorer.js",
+    "analyze": "node analyze-results.js"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.40.0",
+    "playwright": "^1.40.0"
+  }
+}

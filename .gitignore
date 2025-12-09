@@ -1,0 +1,18 @@
+# Tokens and secrets
+inqom_token.txt
+*.env
+*.bubble
+
+# Node modules
+node_modules/
+
+# Playwright
+.playwright-mcp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

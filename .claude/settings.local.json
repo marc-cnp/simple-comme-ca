@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npx playwright:*)",
+      "Bash(node explorer.js:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_resize",
+      "Bash(curl:*)",
+      "Bash(powershell -Command \"\n$body = @{\n    username = ''new@simplecommeca.io''\n    password = ''scN@RN8Kx7GjSz?4''\n    grant_type = ''password''\n    scope = ''apidata openid''\n    client_id = ''simplecommecav2''\n    client_secret = ''DBjTzLWLFE94jSt6Cix9''\n}\n$response = Invoke-RestMethod -Uri ''https://auth.inqom.com/identity/connect/token'' -Method Post -Body $body -ContentType ''application/x-www-form-urlencoded''\n$response.access_token | Out-File -FilePath ''C:\\Users\\Marco\\simple-comme-ca\\inqom_token.txt'' -NoNewline\nWrite-Output ''Token obtenu avec succes''\n\")",
+      "Bash(powershell -Command \"$body = @{ username = ''new@simplecommeca.io''; password = ''scN@RN8Kx7GjSz?4''; grant_type = ''password''; scope = ''apidata openid''; client_id = ''simplecommecav2''; client_secret = ''DBjTzLWLFE94jSt6Cix9'' }; $response = Invoke-RestMethod -Uri ''https://auth.inqom.com/identity/connect/token'' -Method Post -Body $body -ContentType ''application/x-www-form-urlencoded''; $response.access_token | Out-File -FilePath ''C:\\Users\\Marco\\simple-comme-ca\\inqom_token.txt'' -NoNewline; Write-Output ''Token obtenu''\")",
+      "Bash(powershell:*)",
+      "Bash(pandoc:*)",
+      "Bash(dir /b \"C:\\Users\\Marco\\simple-comme-ca\\*.md\")",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "n8n-mcp",
+    "playwright",
+    "supabase",
+    "chrome-devtools",
+    "context7"
+  ]
+}

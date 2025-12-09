@@ -1,0 +1,657 @@
+API Provisioning v0.2
+v0.2 - 06/2023
+
+Introduction
+
+3
+
+Accès et format
+
+3
+
+Authentification
+
+4
+
+URL
+
+4
+
+Réponse
+
+4
+
+Référentiel de données
+
+5
+
+Liste des types de TVA
+
+5
+
+Liste des régimes d'imposition
+
+5
+
+Liste des formes légales
+
+6
+
+Liste des codes NAF
+
+6
+
+Cabinet comptable
+
+7
+
+Création d'un cabinet comptable
+
+7
+
+Création d'un dossier comptable dans un cabinet comptable
+
+8
+
+Récupération de la liste des accounting folders d'un cabinet comptable
+
+9
+
+Recherche dans la liste des accounting folders d'un cabinet comptable
+
+9
+
+Création d'un compte utilisateur dans un cabinet comptable
+
+11
+
+Récupération de la liste des utilisateurs d'un cabinet comptable
+
+11
+
+Migration d'un dossier comptable entre deux cabinets comptables 
+
+13
+
+Accounting Folders
+
+14
+
+Mise à jour d'un dossier comptable (General)
+
+14
+
+Mise à jour d'un dossier comptable (Fiscal)
+
+15
+
+Mise à jour d'un dossier comptable (Legal)
+
+17
+
+Création d'unExercice
+
+18
+
+Récupération des Informations général d'un dossier comptable
+
+19
+
+Récupération des Informations fiscal d'un dossier comptable
+
+20
+
+Récupération des Informations juridique d'un dossier comptable
+
+21
+
+Récupération des Informations social d'un dossier comptable
+
+22
+
+Archiver un dossier comptable
+
+23
+
+Activer un dossier comptable
+
+23
+
+Invitation du client dans le le dossier comptable
+
+25
+
+Récupération de la liste des clients d'un dossier comptable
+
+25
+
+Suppression de l'accès client à le dossier comptable
+
+27
+
+User Assignation
+
+28
+
+Assigner un utilisateur interne dans le cabinet comptable
+
+28
+
+Désassigner un utilisateur interne d'un cabinet comptable
+
+28
+
+Assigner un utilisateur d'un cabinet comptable sur un dossier comptable
+
+30
+
+Désassigner un utilisateur de le cabinet comptable d'un dossier comptable
+
+30
+
+Récupération de la liste des utilisateurs assignés et des utilisateurs internes(ceo / daf / employé) d'un
+
+dossier comptable
+
+32
+
+Récupération de la liste des dossiers comptables pour un utilisateur dans un cabinet comptable 33
+
+Récupération de la liste Cabinet comptable/Dossiers comptables où un utilisateur possède un rôle
+
+interne
+
+33
+
+v0.2 - 06/2023
+
+Introduction
+ Terminologie utilisée dans la documentation de provisioning :
+ Company : pour identifier les Cabinets ou PME qui possèdent des dossiers comptables  AccountingFolder : pour un dossier comptable qui est dans un cabinet comptable  User : pour un compte utilisateur dans Inqom dans des Company et assigné sur des
+AccountingFolder
+Accès et format
+Chiffrement et signature des données La communication avec l'API utilise le protocole de chiffrement TLS, l'usage de Https est obligatoire. Authentification L'accès à l'API est protégé et restreint aux utilisateurs authentifiés auprès du serveur d'identité Inqom. L'authentification s'effectue par l'intermédiaire d'un identifiant/mot de passe du compte system qui vous à été fourni, ainsi qu'un couple «Client Id / Client secret» qui vous permettra de récupérer un jeton de type JWT et qui sera ensuite véhiculé dans les entêtes Https. Protocole de communication, L'API est basée sur le protocole Https.
+Base URL - Prod : https://wa-fred-accounting-services-prod.azurewebsites.net - Recette : https://fredstagingapi.azurewebsites.net
+v0.2 - 06/2023
+
+Authentification
+
+L'authentification se fait selon le protocole Oauth2. Pour pouvoir appeler les autres endpoints contenus dans ce document, il est nécessaire au préalable de récupérer un token d'authentification depuis l'endpoint suivant.
+
+URL
+- Prod: https://auth.inqom.com/identity/connect/token - Recette: https://auth-staging.inqom.com/identity/connect/token
+Method : POST
+Paramètres: Ces champs sont à passer dans le corps de la requête avec un contentType x-www-form-urlencoded
+
+Nom du champ username password grant_type scope client_id client_secret
+
+Description adresse mail du compte d'accès mot de passe du compte d'accès password (tel quel) openid apidata (tel quel) l'id de votre client API le secret de votre client API
+
+Il faudra s'assurer que le compte System qui vous a été fourni est bien présent dans les Company ou vous souhaitez intervenir.
+
+Réponse
+Content-type : application/json; charset=utf-8
+Corps Nom du champ access_token
+
+Description Token d'authentification
+
+Utilisation du token
+Pour tous les endpoints suivants, il est nécessaire de passer en paramètre le token d'authentification récupéré depuis l'API d'authentification décrit ci-dessus. Le token se passe dans l'entête de chaque requête avec le préfixe Bearer : Authorization: Bearer <TokenJWT>
+
+v0.2 - 06/2023
+
+Référentiel de données
+Récupération de données utilisable dans les requêtes de création
+Liste des types de TVA
+Requête URL : {{URLBase}}/provisioning/references/vats
+Method : GET
+Réponse Content-type : application/json; charset=utf-8 Response Body
+Exemple
+[ { "Code": "CA12", "Description": "Annuel - CA12", "Id": 2 } ...
+]
+Liste des régimes d'imposition
+Requête URL : {{URLBase}}/provisioning/references/tax-system
+Method : GET
+Réponse Content-type : application/json; charset=utf-8 Response Body
+Exemple
+[ { "Id": 18, "Code": "IR", "SubCode": "SCM-S", "Description": "IR - SCM Simple" }
+... ]
+v0.2 - 06/2023
+
+Liste des formes légales
+Requête URL : {{URLBase}}/provisioning/references/legal-forms
+Method : GET
+Réponse Content-type : application/json; charset=utf-8 Response Body
+Exemple
+[ { "CountryCodeId": 0, "Code": "AE", "Description": "Auto-entrepeneur", "SinglePerson": true }
+... ]
+Liste des codes NAF
+Requête URL : {{URLBase}}/provisioning/references/naf-codes
+Method : GET
+Réponse Content-type : application/json; charset=utf-8 Response Body
+Exemple
+[ { "Id": 854, "Code": "8891A", "Label": "Accueil de jeunes enfants" }
+... ]
+v0.2 - 06/2023
+
+Cabinet comptable
+Cabinet ou PME
+Création d'un cabinet comptable
+Requête URL : {{URLBase}}/provisioning/Companies/ Method : POST Paramètres Body
+{ "CompanyName": "string", "PhoneNumber": "string", "LastName": "string", "CompanyType": "None", "Location": { "Street": "string", "City": "string", "ZipCode": "string", "AdditionalAddress": "string" }, "ContractType": "Normal"
+}
+Réponse Content-type : application/json; charset=utf-8 Response Body INTEGER Exemple
+42
+Remarque : La création de company par API est uniquement disponible pour des contrats Inqom Provider
+v0.2 - 06/2023
+
+Création d'un dossier comptable dans un cabinet comptable
+Request URL : {{URLBase}}/provisioning/companies/{companyId:int}/accounting-folders Method : POST Paramètres path
+
+Nom du champ companyId
+
+Description Id de le cabinet comptable dans Inqom
+
+Paramètres Body
+{ "Name": "string", "LegalFormId": 0, "TaxSystemId": 0, "Siren": "string", "Nic": "string", "Ape": "string", "CodeNafId": 0, "ShareCapital": "decimal", "ParValue": "decimal", "ExerciseBeginDate": "2023-01-01", "ExerciseEndDate": "2023-12-31", "ExternalId": "string", "CreationDate": "2010-01-05", "Activity": "string", "AccountingType": "engagement", ("Engagement", "Trésorerie") "AccountingFolderTypology": "bookKeeping", ("BookKeeping", "RevisionClosing") "ChartOfAccountsType": "InqomPcg", ("PCGeneral","PCCSE","InqomPcg", "PCAAssociatif") "RcsRegistrationDate": "2023-12-25", "IsListedOnTradeDirectory": true, "Telephone": "string", "Email": "string", "WebSite": "string" "Location": { "Street": "string", "City": "string", "ZipCode": "string", "AdditionalAddress": "string", "Hamlet": "string", "CountryId": 0, (nullable) }, "Assignees": [ 0 ] (users Id liste)
+}
+
+v0.2 - 06/2023
+
+Réponse
+Content-type : application/json; charset=utf-8
+Response Body Object
+{ "Id": 0, "Name": "string", "Siren": "string", "ExternalId": "string", "CompanyId": 0, "Status": "Active" (Active, Closing, Archived)
+}
+
+Récupération de la liste des accounting folders d'un cabinet comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/accounting-folders Method : GET Paramètres (path)
+
+Nom du champ id
+
+Description Id de le cabinet comptable dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "ExternalId": "string", "Id": 0, "Siren": "string", "Nic": "string", "Name": "string", "UniqueName": "string", "ContractType": "Normal", "CreatedAt": "2024-06-25T12:03:43.272Z", "Status": "Active", "AccountingType": "Engagement", "CompanyId": 0, "StateMode": "Active", "OwnerCompanyId": 0 }
+]
+
+v0.2 - 06/2023
+
+Recherche dans la liste des accounting folders d'un cabinet comptable
+
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/accounting-folders/search?search={search} &page={page}&size={size}
+Method : GET
+Paramètres (path)
+
+Nom du champ companyId search
+page size
+
+Description
+Id de le cabinet comptable dans Inqom
+Text rechercher dans (nom du dossier, id externe, nom des membres, form legal)
+Numéro de page (default=1)
+Nombre d'élément par pages (max 100, default 10)
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "Id": 0, "Name": "string", "Siren": "string", "ExternalId": "string", "CompanyId": 0, "Status": "Active" }
+]
+
+v0.2 - 06/2023
+
+Création d'un compte utilisateur dans un cabinet comptable
+Request URL : {{URLBase}}/provisioning/companies/{companyId:int}/users Method : POST Paramètres path
+
+Nom du champ
+companyId
+Paramètres Body
+{ "Gender": "Mrs", (Mrs, Mr, Ms) "Firstname": "string", "Lastname": "string", "Email": "string", "CodeRole": "A", (CA, A, S) "Active": true
+}
+
+Description Id de le cabinet comptable dans Inqom
+
+Code rôle CA A S
+
+Description Expert-comptable Chef de mission comptable Chef de mission sociale
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ "Id": 0, "CabinetId": 0, "Gender": "Mrs", "Firstname": "string", "Lastname": "string", "Email": "string", "CodeRole": "A"
+}
+
+v0.2 - 06/2023
+
+Récupération de la liste des utilisateurs d'un cabinet comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/users Method : GET Paramètres (path)
+
+Nom du champ id
+
+Description Id de le cabinet comptable dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "Id": 0, "Gender": "string", "FirstName": "string", "LastName": "string", "Email": "string", "AvatarUrl": "string", "Role": { "Name": "string", "Description": "string", "Code": "A", (CA, A, S) "Label": "string", "Type": "string" } }
+]
+
+v0.2 - 06/2023
+
+Migration d'un dossier comptable entre deux companies
+
+Request URL : {{URLBase}}/provisioning/companies/{companyId:int}/migrate Method : POST
+
+Paramètres path Nom du champ companyId
+
+Description Id de le cabinet comptable dans Inqom
+
+Paramètres Body
+{ "NewCompanyId": 0, "AccountingFolderId": 0, "UserId": 0
+}
+
+Réponse Content-type : NoContent Response NoContent 204
+Information : UserId doit être un utilisateur déjà présent dans le cabinet comptable de destination.
+
+v0.2 - 06/2023
+
+Dossiers comptables
+Dossier comptable
+
+Mise à jour d'un dossier comptable (General)
+Request URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/permanent-file/general Method : PUT Paramètres path
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Paramètres Body
+{ "Name": "string", "LegalFormId": 0, "Nic": "string", "Ape": "string", "CodeNafId": 0, "Activity": "string", "CreationDate": "2023-01-01", "ExternalId": "string", "RegistrationCity": "string", "RegistrationType": "A", (None, A, B) "RegistrationDate": "2023-01-01", "IsListedOnTradeDirectory": true, (boolean) "Location": { "Street": "string", "City": "string", "ZipCode": "string", "AdditionalAddress": "string", "Hamlet": "string", "CountryId": 0, (nullable) }, "Telephone": "string", "Email": "string", "WebSite": "string",
+}
+
+Réponse
+Content-type : application/json; charset=utf-8 Response NoContent 204
+
+v0.2 - 06/2023
+
+Mise à jour d'un dossier comptable (Fiscal)
+Request URL : {{URLBase}}/v1/accounting-folders/{accountingFolderId:int}/permanent-file/fiscal Method : PUT Paramètres path
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Paramètres Body
+{ "TaxSystemId": 0, "WithDepositeISTax": true, "VatSystemId": 0, "VatDeadlineDay": 0, "VatTaxObligationReference": "string", "VatRateOnTaxableSales": [0.2,0.1, ... ], "VatRateOnTaxablePurchases": 0, "SalesExigibilite": "Unknown", ("OnReceipts","OnDebits","Mixed") "Rof": "string", "RofCVAE": "string", "TaxReporterGender": "string", "TaxReporterName": "string", "TaxReporterTitle": "string", "IsSubjectToCbCR": true, "IsOverHeadCosts": true, "IsTransferPricing": true, "IsCvaeAdvanceDeposit": true, "IsBalance": true, "IsSubjectToCvae": true, "IsMonoEstablishment": true, "IsEligibleForReducedRate": true, "TaxIntracommunityNumber": "string", "HasPayrollTaxLiability": true, "HasCfeLiability": true (Null, true, false) "EnterpriseAdvisors": [ { "Id": 0, "AdvisorType": "Conseil", ("Conseil","Professional","CGA") "Name": "string", "Title": "string", "Address": "string", "AddressComplement": "string", "ZipCode": "string", "City": "string", "Phone": "string", "Locality": "string", "LegalFormId": 0,
+v0.2 - 06/2023
+
+"CountryId": 1, "CGAType": "None", ("None","ViseurConventionne","CGA") "ApprovedCenterNumber": "string" } ], }
+Réponse Content-type : application/json; charset=utf-8 Response NoContent 204
+v0.2 - 06/2023
+
+Mise à jour d'un dossier comptable (Legal)
+
+Request URL : {{URLBase}}/v1/accounting-folders/{accountingFolderId:int}/permanent-file/legal Method : PUT Paramètres path
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Paramètres Body
+{ "ShareCapital": 0, "ParValue": 0, "NaturalPersonShareholdersTotalCount": 0, "NaturalPersonShareholdersTotalShareCount": 0, "LegalPersonShareholdersTotalCount": 0, "LegalPersonShareholdersTotalShareCount": 0,
+}
+
+Réponse
+Content-type : application/json; charset=utf-8 Response NoContent 204
+
+v0.2 - 06/2023
+
+Création d'une Exercice
+Requête URL: {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/accounting-periods Method : POST Paramètres path
+
+Nom du champ
+accountingFolderId
+Paramètres Body
+{ "BeginDate": "2023-06-02T13:34:37.212Z", "EndDate": "2023-06-02T13:34:37.212Z"
+}
+Réponse Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ "Id": 0, "AccountingFolderId": 0, "Name": "string", "BeginDate": "2023-06-02T13:37:01.537Z", "EndDate": "2023-06-02T13:37:01.537Z", "Year": 0
+}
+
+Description Id du AccountingFolder dans Inqom
+
+v0.2 - 06/2023
+
+Récupération des Informations général d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/permanent-file/general Method : GET Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ "Id": 0, "Name": "string", "UniqueName": "string", "CreationDate": "2023-06-15", "Siren": "string", "Ape": "string", "CodeNafId": 0, "MissionLetterDate": "2023-01-10", "Telephone": "string", "Email": "string", "Website": "string", "Activity": "string", "CompanyId": 0, "LegalForm": { "Id": 0, "CountryCodeId": 0, "Code": "string", "Description": "string", "SinglePerson": true }, "Address": { "Street": "string", "PostalCode": "string", "City": "string", "Supplement": "string" }
+}
+
+v0.2 - 06/2023
+
+Récupération des Informations fiscal d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/permanent-file/fiscal Method : GET Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ "Id": 0, "TaxSystem": { "Id": 0, "Code": "string", "SubCode": "string", "Description": "string" }, "VATSystem": { "Code": "string", "Description": "string", "Id": 0, "VATDate": 0 }, "ROF": { "TVA": "string" }
+}
+
+v0.2 - 06/2023
+
+Récupération des Informations juridique d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/permanent-file/legal Method : GET Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Réponse Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ En cours de modification.
+}
+
+v0.2 - 06/2023
+
+Récupération des Informations social d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/permanent-file/social Method : GET Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+{ "Id": 0, "StaffCountAverage": 0, "StaffCountFinal": 0, "PayrollManagedByAccountingFirm": true
+}
+
+v0.2 - 06/2023
+
+Archiver un dossier comptable
+Requête URL: {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/archive Method : POST Paramètres path
+
+Nom du champ
+accountingFolderId
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id du AccountingFolder dans Inqom
+
+v0.2 - 06/2023
+
+Activer un dossier comptable
+Requête URL: {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/active Method : POST Paramètres path
+
+Nom du champ
+accountingFolderId
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id du AccountingFolder dans Inqom
+
+v0.2 - 06/2023
+
+Invitation du client dans le le dossier comptable
+Requête URL: {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/client-invitation Method : POST Paramètres path
+
+Nom du champ
+accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Paramètres Body
+{ "FirstName": "string", "LastName": "string", "Email": "string", "RoleName": "string" (CEO, DAF_READONLY, DAF, E)
+}
+
+Réponse
+Content-type : NoContent Response NoContent 204
+
+v0.2 - 06/2023
+
+Récupération de la liste des clients d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/client-listing Method : GET Paramètres (path)
+
+Nom du champ accountingFolderId
+
+Description Id du AccountingFolder dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "Id": 0, "Gender": "string", "FirstName": "string", "LastName": "string", "Email": "string", "AvatarUrl": "string", "Role": { "Code": "string", "Label": "string", "Type": "string" } }
+]
+
+v0.2 - 06/2023
+
+Suppression de l'accès client à le dossier comptable
+Requête
+URL:
+{{URLBase}}/provisioning/accounting-folders/{accountingFolderId:int}/client-remove?userId={userId} Method : POST
+Paramètres path
+
+Nom du champ
+accountingFolderId userId
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id du AccountingFolder dans Inqom Id de l'utilisateur client
+
+v0.2 - 06/2023
+
+User Assignation
+Affectation des utilisateurs
+
+Assigner un utilisateur interne dans le cabinet comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/assign Method : POST Paramètres path
+
+Nom du champ
+companyId
+Paramètres Body
+{ "UserId": 0, "CodeRole": "A", (CA, A, S)
+}
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id de le cabinet comptable dans Inqom
+
+v0.2 - 06/2023
+
+Désassigner un utilisateur interne d'un cabinet comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/unassign Method : POST Paramètres path
+
+Nom du champ
+companyId
+Paramètres Body
+{ "UserId": 0,
+}
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id de le cabinet comptable dans Inqom
+
+v0.2 - 06/2023
+
+Assigner un utilisateur d'un cabinet comptable sur un dossier comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/accounting-folders/assign Method : POST
+Paramètres path
+
+Nom du champ
+companyId
+Paramètres Body
+{ "UserId": 0, "AccountingFoldersId": [ 0, ... ]
+}
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id de le cabinet comptable dans Inqom
+
+v0.2 - 06/2023
+
+Désassigner un utilisateur de le cabinet comptable d'un dossier comptable
+Requête URL : {{URLBase}}/provisioning/companies/{companyId:int}/accounting-folders/unassign Method : POST
+Paramètres path
+
+Nom du champ
+companyId
+Paramètres Body
+{ "UserId": 0, "AccountingFolderId": 0
+}
+Réponse Content-type : NoContent Response NoContent 204
+
+Description Id de le cabinet comptable dans Inqom
+
+v0.2 - 06/2023
+
+Récupération de la liste des utilisateurs assignés et des utilisateurs internes(ceo / daf / employé) d'un dossier comptable
+Requête URL : {{URLBase}} /provisioning/companies/{companyId:int}/accounting-folders/{accountingFolderId:int}/users
+Method : GET
+Paramètres (path)
+
+Nom du champ companyId accountingFolderId
+
+Description Id de le cabinet comptable dans Inqom Id du AccountingFolder dans Inqom
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "Id": 0, "Gender": "string", "FirstName": "string", "LastName": "string", "Email": "string", "AvatarUrl": "string", "Role": { "Code": "string", "Label": "string", "Type": "string" } }
+]
+
+v0.2 - 06/2023
+
+Récupération de la liste des dossiers comptables pour un utilisateur dans un cabinet comptable
+Requête URL : {{URLBase}} /provisioning/companies/{companyId:int}/users/{userId:int}/accounting-folders Method : GET
+Paramètres (path)
+
+Nom du champ companyId userId
+
+Description Id de le cabinet comptable dans Inqom Id de l'utilisateur
+
+Réponse
+Content-type : application/json; charset=utf-8 Response Body Object
+Exemple
+[ { "Id": 0, "Name": "string", "Siren": "string", "ExternalId": "string", "CompanyId": 0, "Status": "Active" }
+]
+
+v0.2 - 06/2023
+
+Récupération de la liste Cabinet/Dossiers où un utilisateur possède un rôle interne
+Dans le cas des comptes admin, cela renvoie tous les Cabinets comptables / Dossiers sur lesquels le compte peut effectuer des actions de provisioning.
+Requête URL : {{URLBase}}/provisioning/users/internal-access Method : GET
+Réponse Content-type : application/json; charset=utf-8 Response Body Object Exemple
+[ { "Id": 0, "Name": "string", "ExternalId": "string", "AccessType": "string", (Valeurs possible => {Company, AccountingFolder}) (Seulement dans le cas des AccountingFolder) "Status": "string", (Valeurs possible => {Active, Closing, Achived}) "CompanyName": "string" (Nom de le cabinet comptable dans laquelle est le dossier comptable) }
+]
+v0.2 - 06/2023
+
+

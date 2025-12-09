@@ -1,0 +1,186 @@
+
+Suggestion insertedConversation opened. 30 messages. All messages read.
+
+Skip to content
+Using Evodev Mail with screen readers
+inqom 
+
+1 of 32
+Fwd: inqom - Suivi de votre dossier
+External
+Inbox
+AI Overview
+Sylvie a demandé à Marc de confirmer si les clés API Inqom fournies par Fanny étaient correctes pour le nouveau développeur.
+La discussion a porté sur l'authentification API, passant de RessourceOwner à AuthorizationCode, puis revenant à RessourceOwner avec de nouveaux identifiants.
+Anne-Hélène a fourni de nouveaux identifiants RessourceOwner valides et a précisé que l'URL api.inqom.com est la base, mais qu'il faut utiliser l'endpoint spécifique pour les dossiers.
+Achraf a confirmé que les nouveaux identifiants fonctionnent et qu'il utilisera l'URL de base https://api.inqom.com avec l'endpoint corrigé.
+By Gemini; there may be mistakes. Learn more
+
+Sylvie GUIRAUD
+Oct 21, 2025, 9:26 AM
+Bonjour Marc J'espère que vous allez bien J'ai eu un retour d' Inqom concernant l' API dans le mail ci dessous, dites moi si c'est bien cela ? Merci pour votre
+7
+
+Fanny Scuoch
+Nov 17, 2025, 9:48 AM
+Bonjour Marc, J'ajoute ma collègue Anne-Hélène, qui est spécialiste sur ce sujet, en copie de ce mail. Pourriez-vous nous indiquer la requête précise qui est ef
+7
+
+Anne-Hélène PLEVIN
+Nov 24, 2025, 6:48 PM (9 days ago)
+Bonsoir à tous les deux, J'espère que vous allez bien. Nous vous avions initialement fourni des credentials pour une identification en RessourceOwner qui ne con
+
+Achraf Faytout
+Tue, Nov 25, 10:26 AM (8 days ago)
+Bonjour Anne-Hélène, Voici une vidéos explicative de notre besoin en terme d'identification API : SCC | Besoin d'autorisation et de credentials pour l'API [For
+
+Anne-Hélène PLEVIN
+Tue, Nov 25, 3:51 PM (8 days ago)
+Bonjour Achraf, Je vous remercie pour votre vidéo explicative très claire. Pour le swagger, il a seulement vocation à être utilisé dans un but documentaire (pou
+
+Achraf Faytout
+Wed, Nov 26, 10:07 AM (7 days ago)
+Bonjour Anne-Hélène, Merci pour votre retour ainsi que pour vos explications. Vous pouvez utiliser l'adresse suivante pour la création d'un user system : new@si
+
+Anne-Hélène PLEVIN
+Wed, Nov 26, 11:04 AM (7 days ago)
+Bonjour Achraf, Avec plaisir ! Je viens de créer le compte System sur le compte de SimpleCommeCa : Vous avez dû recevoir un email Inqom sur l'adresse new@simple
+
+Achraf Faytout
+Wed, Nov 26, 11:22 AM (7 days ago)
+Re bonjour, Nous n'avons pas reçu le mail sur l'adresse new@simplecommeca.io (vérification faite également dans les spams) Serait-il possible de vérifier l'envo
+
+Anne-Hélène PLEVIN
+Wed, Nov 26, 11:28 AM (7 days ago)
+Achraf, je viens de relancer l'invitation, est-ce arrivé à bon port ? Bien à vous, Anne-Hélène
+
+Achraf Faytout
+Wed, Nov 26, 11:36 AM (7 days ago)
+to Anne-Hélène, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Oui, bien reçu
+
+Merci à vous
+
+Achraf
+
+Achraf Faytout
+Wed, Nov 26, 11:52 AM (7 days ago)
+to Anne-Hélène, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Anne-Hélène,
+Nous avons eu cet erreur quand nous avons fait l'appel avec le type RessourceOwner (voir P.j)
+
+image.png
+
+Anne-Hélène PLEVIN
+Wed, Nov 26, 12:32 PM (7 days ago)
+to Achraf, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Décidément, on les accumule 😄. J'ai trouvé la raison de l'erreur. Initialement les clés créées en staging étaient identiques en production. Un changement très récent dans la gestion de nos credentials implique de créer une clé par environnement (prod/staging).
+
+C'est donc chose faite ! 
+
+Voici vos credentials RessourceOwner finaux pour le compte de production SimpleCommeCa :
+- client_id : simplecommecav2
+- client_secret : DBjTzLWLFE94jSt6Cix9
+
+Je viens de les tester avec mon compte et ils sont fonctionnels :
+Capture d’écran 2025-11-26 à 12.24.36.png
+
+Très bon après-midi,
+Anne-Hélène 
+
+Achraf Faytout
+Nov 26, 2025, 2:30 PM (7 days ago)
+to Anne-Hélène, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Nous avons bien pu récupérer les tokens via les credentiels fournis, aucun souci de ce côté-là.
+
+En revanche, nous ne savons pas quelle base URL utiliser pour effectuer les appels API.
+Nous avons testé l'URL suivante : api.inqom.com et d'autres URL que nous avons trouvées (https://help.inqom.com/fr/endpoints-prod-staging), mais celle-ci nous retourne une erreur 403.
+
+image.png
+
+Auriez-vous la bonne base URL ou une indication sur la source possible du problème ?
+
+Merci,
+
+Achraf
+
+Anne-Hélène PLEVIN
+Attachments
+Nov 26, 2025, 3:31 PM (7 days ago)
+to Achraf, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Achraf,
+
+L'erreur ne vient pas de la base de l'url mais de l'endpoint utilisé. Vous avez trouvé le seul qui nous est réservé en interne 😅 (remonte tous les dossiers de tous nos clients). Pour obtenir la liste des dossiers de SimpleCommeCa, vous devez utiliser l'endpoint https://api.inqom.com/provisioning/companies/28118/accounting-folders (28118 étant votre CompanyId). 
+
+Vous les récupérer sous cette forme :
+"ExternalId": "test",
+"Id": 220418,
+"Siren": "000581395",
+"Nic": "00099"
+"Name": "Test Inqom",
+"UniqueName": "test",
+"ContractType": "Fake",
+"CreatedAt": "2025-10-15T12:52:47.67Z",
+"Status": "Active",
+"AccountingType": "Engagement",
+"CompanyId": 28118
+Ci-joint, notre documentation API pouvant vous être utile. 
+
+Bien à vous,
+Anne-Hélène
+ 4 Attachments
+  •  Scanned by Gmail
+
+Achraf Faytout
+Nov 26, 2025, 4:51 PM (7 days ago)
+to Anne-Hélène, me, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+It looks like this message is in French
+Merci beaucoup pour votre retour ainsi que pour la précision concernant l’endpoint, cela explique effectivement l’erreur rencontrée.
+
+Nous allons donc utiliser la base URL :  https://api.inqom.com
+
+Merci également pour les informations sur la structure ainsi que pour la documentation jointe, cela va nous aider à avancer plus efficacement.
+
+Je reviens vers vous si nous rencontrons d’autres questions lors de nos intégrations.
+
+
+
+Achraf
+
+
+Marc de Chavanes <marc@evodev.co>
+9:45 AM (4 hours ago)
+to Achraf, Anne-Hélène, Fanny, Sylvie, Marie, Quentin-Loïc, Bruno
+
+Bonjour Anne-Hélène,
+
+Disposez-vous d’une documentation plus complète sur les appels API disponibles ? Par exemple, nous ne trouvons pas le point d’accès permettant d’obtenir les codes TVA d'un dossier comptable, ni celui donnant accès aux informations extraites d’un document via votre processus d’OCR.
+
+Pouvez-vous nous les partager au plus vite, ce serait très appréciable. 
+
+Merci et bonne journée.  
+
+
+Bonjour Marc,
+
+Voici la documentation exhaustive de nos différentes API :  API Accounting Documents, API Loans, API FixeAsset, API Banking CFONB, API Payment, API Billing, API Analytics, API Provisionning.
+
+Pour répondre à vos deux interrogations :
+- Les codes TVA se trouvent dans l’API Provisioning, dans la section référentiel, qui expose les tables de référence globales dont les types de TVA : GET {{URLBase}}/provisioning/references/vats. Cette API fournit le référentiel TVA global mais pas le paramétrage TVA spécifique à un dossier (pas exposé),
+- Les informations extraites via OCR se récupèrent dans l’API Accounting Documents, dans le champ GoogleJsonUrl de la pièce ("GoogleJsonUrl": "https://.../extraction.json") : GET /api/accounting-documents/accounting-folders/{accountingFolderId}/Documents/{id}.
+
+En espérant que cela vous aidera. Je reste disponible si besoin.
+
+Bien à vous,
+Anne-Hélène

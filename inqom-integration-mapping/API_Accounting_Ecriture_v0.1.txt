@@ -1,0 +1,2676 @@
+API Accounting
+v0.1 - 04/2021
+
+Introduction Accès et format Authentification
+Requête Réponse Utilisation du token Resources Base URL AccountingPeriods Lecture des exercices
+Réponse Exemple Ajout d'un exercice V2 Réponse Exemple Ajout d'un exercice (déprécié) Réponse Exemple Journals GET Journals Request Réponse Exemple POST Journals Request Réponse Exemple Accounts GET Accounts Requête Exemple Réponse Exemple POST Accounts Request Réponse Exemple EntryLines GET EntryLines Count Réponse Exemple GET EntryLines
+v0.1 - 04/2021
+
+Requête Réponse Exemple GET EntryLines Changes Count Requête Réponse Exemple GET EntryLines Changes Requête Réponse Exemple GET EntryLines Changes With Analytic Requête Réponse Exemple Entries POST Entries Request Exemple Réponse Exemple Analytics POST Analytics Request Exemple Accounting Documents GET AccountingDocuments Request Réponse Exemple POST AccountingDocuments Request Réponse Exemple Letterings Ajout de lettrage en masse Request Exemple Réponse Suppression de lettrage en masse Request Exemple Réponse
+v0.1 - 04/2021
+
+A-Nouveaux Lecture A-Nouveaux virtuel Request Réponse Exemple
+Import FEC ou Balance Pré-requis Pré-mapping (utilisation avancée) Étapes de l'import Template mapping comptes (utilisation avancée) Format du fichier Fonctionnement Exemples Sans Expression régulière Template Evaluation Avec Expression régulière Template Evaluation Template mapping journaux (utilisation avancée) Format du fichier Fonctionnement Exemples Sans Expression régulière Template Evaluation Avec Expression régulière Template Evaluation Qui ne fonctionne pas ! Template Evaluation Autre exemple Template Journaux préexistant dans Inqom Création de l'opération d'import FEC Réponse Exemple Création de l'opération d'import de Balance Réponse Exemple Lecture de l'opération d'import FEC Réponse
+v0.1 - 04/2021
+
+Exemple Lecture des problèmes d'une opération d'import FEC (statut WaitingUserAction)
+Réponse Exemple Résolution des problèmes d'une opération d'import FEC (statut WaitingUserAction) Réponse Exemple Lecture des mapping des journaux (statut WaitingUserAction) Réponse Exemple Mapping d'un journal du FEC avec un journal Inqom (statut WaitingUserAction) Lecture des mapping des comptes (statut WaitingUserAction) Réponse Exemple Mapping d'un compte du FEC avec un compte Inqom (statut WaitingUserAction) Lecture des mapping des tags (statut WaitingUserAction) Réponse Exemple Mapping d'un axe/tag du FEC avec un axe/tag Inqom (statut WaitingUserAction) Intégration du FEC (statut WaitingUserAction) Export FEC Création d'une demande d'export FEC Réponse Exemple Consultation d'une demande d'export FEC Réponse Exemple Transformation TRA en FEC Génération d'un fichier zip contenant les FEC par exercice contenu dans le TRA Réponse Erreurs et Status codes
+v0.1 - 04/2021
+
+Introduction
+Ce document décrit le mode d'emploi des endpoints API suivants :  authentification  récupération des exercices comptables  récupération des journaux comptables  récupération des comptes comptables  création d'un compte comptable  récupération des lignes comptables  récupération de changements sur lignes comptables  création d'écritures comptables par lots  lettrage de lignes comptables  récupération d'une pièce comptable et metadata associées  upload de pièce comptable et metadata associées
+Accès et format
+Chiffrement et signature des données La communication avec l'API utilise le protocole de chiffrement TLS, l'usage de Https est obligatoire. Authentification L'accès à l'API est protégé et restreint aux utilisateurs authentifiés auprès du serveur d'identité Inqom. L'authentification s'effectue par l'intermédiaire d'un identifiant/mot de passe. Un « Client Api » permettra au CLIENT de récupérer un jeton de type JWT qui sera ensuite véhiculé dans les entêtes Http.
+Protocole de communication L'API est basée sur le protocole Https.
+v0.1 - 04/2021
+
+Authentification
+
+L'authentification se fait selon le protocole Oauth2. Pour pouvoir appeler les autres endpoints contenus dans ce document, il est nécessaire au préalable de récupérer un token d'authentification depuis l'endpoint suivant.
+
+Requête
+URL - Prod: https://auth.inqom.com/identity/connect/token - Recette: https://auth-staging.inqom.com/identity/connect/token
+Method POST
+Paramètres Ces champs sont à passer dans le corps de la requête avec un contentType x-www-form-urlencoded
+
+Nom du champ username password grant_type scope client_id client_secret
+
+Description adresse mail du compte d'accès mot de passe du compte d'accès "password" (tel quel) "openid apidata" (tel quel) l'id de votre client API le secret de votre client API
+
+Il faudra s'assurer que l'utilisateur en question a bien des droits de lecture sur les dossiers sur lesquels on souhaite faire des requêtes..
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Corps Nom du champ access_token
+
+Description Token d'authentification
+
+Utilisation du token
+Pour tous les endpoints suivants, il est nécessaire de passer en paramètre le token d'authentification récupéré depuis l'API d'authentification décrit ci-dessus. Le token se passe dans l'entête de chaque requête avec le préfixe Bearer :
+Authorization: Bearer <TokenJWT>
+
+Resources
+Base URL
+- Prod : https://wa-fred-accounting-services-prod.azurewebsites.net - Recette : https://fredstagingapi.azurewebsites.net/index.html
+AccountingPeriods
+. Un exercice comptable dans Inqom. L'endpoint suivant permet de récupérer la liste des exercices dans Inqom.
+
+Lecture des exercices
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/accounting-periods
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+v0.1 - 04/2021
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ id dossierId name beginDate endDate locked previousAccountingPeriod
+
+Description Id de l'exercice Id du dossier Nom de l'exercice date de début de l'exercice date de fin de l'exercice true/false si verrouillé ou non Id de l'exercice précédent
+
+Exemple
+[ { "Id": 8382, "dossierId": 4552, "BeginDate": "2018-01-01T00:00:00Z", "EndDate": "2018-12-31T00:00:00Z", "Locked": false, "Name": "2018-12" },
+{ "Id": 8383, "dossierId": 4552, "BeginDate": "2019-01-01T00:00:00Z", "EndDate": "2019-12-31T00:00:00Z", "Locked": false, "Name": "2019-12", "PreviousAccountingPeriod": 8382
+}  ]
+
+v0.1 - 04/2021
+
+Ajout d'un exercice V2
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/exercices/v2
+
+Method POST
+
+Paramètres (path) Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (body)
+
+Nom du champ beginDate endDate
+
+Description Date de début de l'exercice Date de fin de l'exercice
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ id EnterpriseId name beginDate endDate
+Exemple
+
+Description Id de l'exercice Id du dossier Nom de l'exercice date de début de l'exercice date de fin de l'exercice
+
+v0.1 - 04/2021
+
+{ "Id": 8382, "EnterpriseId": 4552, "BeginDate": "2018-01-01T00:00:00Z", "EndDate": "2018-12-31T00:00:00Z", "Name": "2018-12"
+}
+
+Ajout d'un exercice (déprécié)
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/exercices
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (query)
+
+Nom du champ beginDate endDate
+
+Description Date de début de l'exercice Date de fin de l'exercice
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ id EnterpriseId name
+
+Description Id de l'exercice Id du dossier Nom de l'exercice
+
+v0.1 - 04/2021
+
+beginDate endDate
+
+date de début de l'exercice date de fin de l'exercice
+
+Exemple
+
+{ "Id": 8382, "EnterpriseId": 4552, "BeginDate": "2018-01-01T00:00:00Z", "EndDate": "2018-12-31T00:00:00Z", "Name": "2018-12"
+}
+
+Journals
+
+Un journal comptable dans Inqom. L'endpoint suivant permet de récupérer la liste des journaux d'un dossier.
+GET Journals
+Request URL {{URLBase}}/v1/dossiers/{dossierId}/journals Method GET Paramètres path
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Response Body
+Nom du champ Id Name Description Type
+Exemple
+[ { "Id": 32677, "Name": "HA", "Description": "Achat", "Type": "Buy" }, { "Id": 32678, "Name": "VT", "Description": "Vente", "Type": "Sell" }, { "Id": 32679, "Name": "BQ", "Description": "Banque", "Type": "Bank" }
+]
+
+Description
+Id du journal
+Nom du journal
+Description du journal
+Type de journal, parmi les suivants : Other = Autre, Buy = Achat, Sell = Vente, Bank = Banque, Misc = Opération Divers, Cash = Caisse, Salary = Salaire,, ANouveaux = Nouveaux, Depreciation = Amortissement, CutOff = Cutoff
+
+v0.1 - 04/2021
+
+POST Journals
+Request URL {{URLBase}}/api/app/enterprises/{enterpriseId}/journals Method POST Paramètres path
+
+Nom du champ enterpriseId command
+
+Description
+Id du dossier dans Inqom
+Un objet de format json { "Type": "Other", "Name": "string (varchar (4))", "Description": "string", "EnterpriseId": 0 } où Type est le type de journal, parmi les suivants :
+Other = Autre, Buy = Achat, Sell = Vente, Bank = Banque, Misc = Opération Divers, Cash = Caisse, Salary = Salaire, ANouveaux = Nouveaux, Depreciation = Amortissement, CutOff = Cutoff
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ
+
+Description
+
+v0.1 - 04/2021
+
+Id Name Description TypeDescription Type
+EnterpriseId
+Exemple
+{ "Id": 32677, "Name": "HA", "Description": "Achat", "Type": "Buy", "EnterpriseId": 1871
+}
+
+Id du journal
+Nom du journal
+Description du journal
+Description du type du journal
+Type de journal, parmi les suivants : Other = Autre, Buy = Achat, Sell = Vente, Bank = Banque, Misc = Opération Divers, Cash = Caisse, Salary = Salaire,, ANouveaux = Nouveaux, Depreciation = Amortissement, CutOff = Cutoff
+Id du dossier dans Inqom
+
+Accounts
+Comptes comptables de l'entreprise. L'endpoint suivant permet de récupérer la liste des comptes comptables d'une entreprise donnée.
+
+v0.1 - 04/2021
+
+GET Accounts
+
+Requête
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/accounts
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres query
+Nom du champ accountNumberPrefix (optionnel)
+
+Format String
+
+accountType (optionnel)
+
+All/Impactable
+
+Description
+Pour ne récupérer que les comptes dont le numéro commence par "accountNumberPrefix"
+All - inclure tous les comptes Impactable - seulement les comptes impactables (par défaut)
+
+Exemple
+{{URLBase}}/v1/dossiers/23510/accounts?accountNumberPrefix=709&accountTy pe=Impactable
+
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Response Body Liste de comptes, avec les champs suivants :
+
+Nom Number Name IsImpactable IsDivisible
+ParentAccountNumber
+
+Description
+Numéro du compte
+Nom du compte
+Compte impactable (true/false)
+Compte divisible en sous comptes (true/false)
+Compte parent (Compte parent si le compte est dans une balance auxiliaire, null si le compte est dans la balance générale)
+
+Exemple
+[ { "Number": "1011", "Name": "Capital souscrit - non appelé", "IsImpactable": true, "IsDivisible": true }, { "Number": "1012", "Name": "Capital souscrit - appelé, non versé", "IsImpactable": true, "IsDivisible": true }, { "Number": "10131", "Name": "Capital non amorti", "IsImpactable": true, "IsDivisible": true },
+....
+
+POST Accounts
+Request URL {{URLBase}}/v1/dossiers/{dossierId}/accounts
+v0.1 - 04/2021
+
+Method POST Paramètres path
+Nom du champ dossierId AccountNumber Name Auxiliarize (optionnel)
+
+Format
+
+Description
+
+int
+
+Id du dossier dans Inqom
+
+string (22 caractères max) Numéro du compte
+
+string (100 caractères max) Libellé du compte
+
+True/False
+
+Si le compte racine est auxiliarisable, faut il auxiliariser le compte créé ou le laisser dans la balance générale? Par défaut les comptes de tiers sont auxiliarisés.
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ AccountNumber
+
+Description Numéro du compte créé
+
+Attention : nous appliquons une logique de mapping pour pouvoir intégrer le compte passé en paramètre dans le plan comptable Inqom. Ainsi il se peut que le numéro du compte créé soit légèrement différent du numéro demandé.  Exemple: un compte "401FOURNISSEUR sera transformé en 4011FOURNISSEUR" Si la création s'opère bien, la réponse sera de type 201 Created et contiendra le numéro du compte nouvellement créé.
+Exemple
+"4011FOURNISSEUR"
+v0.1 - 04/2021
+
+EntryLines
+GET EntryLines Count
+Cet endpoint permet de récupérer le nombre de pages de résultats que renverrait un appel à l'endpoint "EntryLines". (l'endpoint Entrylines retourne 100 lignes par page au maximum)
+URL {{URLBase}}/v1/dossiers/{dossierId}/entry-lines/count
+
+Method GET Paramètres (path) Nom du champ dossierId *
+Paramètres Query
+
+Description Id du dossier dans Inqom
+
+Nom du champ startDate *
+
+Format Date (YYYY-MM-DD)
+
+endDate *
+
+Date (YYYY-MM-DD)
+
+accountNumber (optionnel) str
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Description
+date de début de la période souhaitée
+date de fin de la période souhaitée
+Filtre sur un compte (si laissé vide : par défaut tous)
+
+v0.1 - 04/2021
+
+Nom TotalLinesCount TotalPagesCount
+Exemple { "TotalLinesCount": 922, "TotalPagesCount": 10
+}
+
+Description Nombre total de lignes Nombre total de pages
+
+GET EntryLines
+Ligne comptables. L'endpoint suivant permet de récupérer les lignes comptables d'un ou tous les comptes d'une entreprise sur une période donnée.
+
+Requête
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/entry-lines
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId *
+
+Description Id du dossier dans Inqom
+
+Paramètres (query) Nom du champ pageNumber
+startDate *
+endDate *
+
+Description Numéro de la page de résultats Date (YYYY-MM-DD)
+Date (YYYY-MM-DD)
+
+date de début de la période souhaitée
+date de fin de la période souhaitée
+
+v0.1 - 04/2021
+
+accountNumber (optionnel) string
+
+journalId (optionnel)
+
+int
+
+Filtre sur un compte (si laissé vide : par défaut tous )
+Filtre sur un journal si défini
+
+Chaque page retourne 100 lignes. Le nombre total de pages disponibles est requêtable via l'endpoint "EntryLines - Count".
+
+https://wa-fred-accounting-services-prod.azurewebsites.net/v1/dossiers/2 3510/entry-lines?startDate=2020-01-01&endDate=2020-12-31&accountNumber=1 2&pageNumber=1
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom EntryLines [ Id Label DebitAmount CreditAmount Letter LetterId LetterDate Currency Entry Entry / Id Entry / Date
+
+Description une liste de lignes comptables
+Id de la ligne comptable Libellé Montant au débit Montant au crédit Lettrage Id technique du lettrage Date du lettrage Devise
+Id de l'écriture correspondante Date de valeur
+
+v0.1 - 04/2021
+
+AccountNumber Journal Journal / Id Journal / Code AccountingDocument AccountingDocument / Id AccountingDocument / Reference ] CurrentPage
+
+Numéro du compte
+ID Journal Code du journal
+Id de la pièce justificative dans Inqom Référence de la pièce justificative
+Numéro page actuelle
+
+Exemple
+{ "EntryLines": [ { "Id": 3833298, "Label": "FRANPRIX SUPERMARCHE - 1002 - CHOCOLAT AU LAIT", "DebitAmount": 0, "CreditAmount": 250, "Currency": "EUR", "Entry": { "Id": 1123177, "Date": "2020-10-05T00:00:00Z" }, "AccountNumber": "707", "Journal": { "Id": 67916, "Code": "VT" } }, {
+...
+
+GET EntryLines Changes Count
+Cet endpoint permet de récupérer le nombre de pages de résultats que renverrait un appel à l'endpoint "EntryLines Changes". (l'endpoint Entrylines Changes retourne 100 lignes par page au maximum)
+
+v0.1 - 04/2021
+
+Requête
+URL {{URLBase}}/v1/dossiers/{dossierId}/entry-lines/changes/count
+
+Method GET Paramètres (path) Nom du champ dossierId *
+Paramètres (query)
+
+Description Id du dossier dans Inqom
+
+Nom du champ
+
+Format
+
+Description
+
+startDate *
+
+Date (YYYY-MM-DD)
+
+date de début de la période souhaitée
+
+endDate *
+
+Date (YYYY-MM-DD)
+
+date de fin de la période souhaitée
+
+accountNumber (optionnel) str
+
+Filtre sur un compte (si laissé vide : par défaut tous)
+
+changesAfterDate *
+
+Date et heure (YYYY-MM-DDTHH:MM:SS-0 0:00)
+
+Filtrer sur les lignes ajoutées, modifiées ou supprimées après la date donnée
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom TotalLinesCount TotalPagesCount
+
+Description Nombre total de lignes Nombre total de pages
+
+v0.1 - 04/2021
+
+Exemple
+{ "TotalLinesCount": 922, "TotalPagesCount": 10
+}
+
+GET EntryLines Changes
+Les modifications sur les lignes comptables. Cet endpoint permet de récupérer les lignes comptables d'un ou plusieurs comptes sur une période donnée, qui ont été ajoutées, modifiées ou supprimées après une date donnée.  Elle permet en pratique de suivre lors d'un appel à toutes les modifications qui ont eu lieu sur un groupe de lignes comptables depuis le dernier appel A-1.
+
+Requête
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/entry-lines/changes
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId *
+
+Description Id du dossier dans Inqom
+
+Paramètres (query)
+
+Nom du champ startDate *
+
+Format Date (YYYY-MM-DD)
+
+endDate *
+
+Date (YYYY-MM-DD)
+
+accountNumber (optionnel) string
+
+changedBefore
+
+Date et heure
+
+Description
+date de début de la période souhaitée
+date de fin de la période souhaitée
+Filtre sur un compte (si laissé vide : par défaut tous )
+Filtrer sur les lignes
+
+v0.1 - 04/2021
+
+changedAfter (optionnel) pageNumber
+
+(YYYY-MM-DDTHH:MM:SS-0 0:00)
+
+ajoutées, modifiées ou supprimées avant la date donnée (analytique inclus, axe et tag ajoutés, modifiés, supprimés)
+
+Date et heure (YYYY-MM-DDTHH:MM:SS-0 0:00)
+
+Filtrer sur les lignes ajoutées, modifiées ou supprimées après la date donnée (analytique inclus, axe et tag ajoutés, modifiés, supprimés)
+
+Integer
+
+Numéro de la page de résultats. Chaque page retourne 1000 lignes. Le nombre total de pages disponibles est requêtable via l'endpoint "EntryLines Count".
+
+https://wa-fred-accounting-services-prod.azurewebsites.net/v1/dossiers/2 296/entry-lines/changes?startDate=2020-01-01&endDate=2021-12-31&changedA fter=2021-01-01&pageNumber=1
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom EntryLines [ ChangeType
+Id
+
+Description une liste de lignes comptables
+
+la nature de la modification : ajout,
+
+modification
+
+ou
+
+suppression
+
+(Addition/Modification/Deletion)
+
+Id de la ligne comptable
+
+v0.1 - 04/2021
+
+Label DebitAmount CreditAmount Letter LetterId LetterDate Currency Entry Entry / Id Entry / Date AccountNumber Journal Journal / Id Journal / Code AccountingDocument AccountingDocument / Id AccountingDocument / Reference ] CurrentPage
+
+Libellé Montant au débit Montant au crédit Lettrage Id technique du lettrage Date du lettrage Devise
+Id de l'écriture correspondante Date de valeur Numéro du compte
+ID Journal Code du journal
+Id de la pièce justificative dans Inqom Référence de la pièce justificative
+Numéro page actuelle
+
+Exemple
+{ "EntryLines": [ { "TypeOfChange": "Update", "Id": 2272792, "Label": "CHRISTIANE HILE - 1008", "DebitAmount": 0, "CreditAmount": 2.4, "Currency": "EUR", "Entry": { "Id": 533712,
+
+v0.1 - 04/2021
+
+"Date": "2020-11-14T00:00:00Z" }, "AccountNumber": "22@", "Journal": {
+"Id": 32678, "Code": "VT" }, "AccountingDocument": { "Id": 414682, "Reference": "1008" } } ], "CurrentPage": 1 }
+
+GET EntryLines Changes With Analytic
+Les modifications sur les lignes comptables. Cet endpoint permet de récupérer les lignes comptables d'un ou plusieurs comptes sur une période donnée, qui ont été ajoutées, modifiées ou supprimées après une date donnée ou ayant leur analytique qui a été modifié (ajouté / modifié / supprimé).  Elle permet en pratique de suivre lors d'un appel Y toutes les modifications qui ont eu lieu sur un groupe de lignes comptables depuis le dernier appel X.
+
+Requête
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/entry-lines/changes-with-analytics
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId *
+
+Description Id du dossier dans Inqom
+
+Paramètres (query)
+
+Nom du champ startDate *
+
+Format Date (YYYY-MM-DD)
+
+Description date de début de la période
+
+v0.1 - 04/2021
+
+souhaitée
+
+endDate *
+
+Date (YYYY-MM-DD)
+
+date de fin de la période souhaitée
+
+accountNumber (optionnel) string
+
+Filtre sur un compte (si laissé vide : par défaut tous )
+
+changedBefore *
+
+Date et heure (YYYY-MM-DDTHH:MM:SS-0 0:00)
+
+Filtrer sur les lignes ajoutées, modifiées ou supprimées avant la date donnée (analytique inclus, axe et tag ajoutés, modifiés, supprimés)
+
+changedAfter (optionnel)
+
+Date et heure (YYYY-MM-DDTHH:MM:SS-0 0:00)
+
+Filtrer sur les lignes ajoutées, modifiées ou supprimées après la date donnée (analytique inclus, axe et tag ajoutés, modifiés, supprimés)
+
+pageNumber *
+
+Integer
+
+Numéro de la page de résultats. Chaque page retourne 100 lignes. Le nombre total de pages disponibles est requêtable via l'endpoint "EntryLines Count".
+
+PageItemsCount *
+
+Integer
+
+Nombre de ligne retournées, maximum 1000 lignes
+
+https://wa-fred-accounting-services-prod.azurewebsites.net/v1/dossiers/2 296/entry-lines/changes-with-analytics?startDate=2020-01-01&endDate=2021 -12-31&changedAfter=2021-01-01&pageNumber=1
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+v0.1 - 04/2021
+
+Nom EntryLines [ ChangeType
+Id Label DebitAmount CreditAmount Letter LetterId LetterDate Currency Entry Entry / Id Entry / Date AccountNumber Journal Journal / Id Journal / Code AccountingDocument AccountingDocument / Id AccountingDocument / Reference Analytics
+[ AxisId Tags
+[
+
+Description une liste de lignes comptables
+
+la nature de la modification : ajout,
+
+modification
+
+ou
+
+suppression
+
+(Addition/Modification/Deletion)
+
+Id de la ligne comptable
+
+Libellé
+
+Montant au débit
+
+Montant au crédit
+
+Lettrage
+
+Id technique du lettrage
+
+Date du lettrage
+
+Devise
+
+Id de l'écriture correspondante Date de valeur Numéro du compte
+
+ID Journal Code du journal
+
+Id de la pièce justificative dans Inqom Référence de la pièce justificative Liste de l'analytique de l'entryline
+
+Id de l'axe Liste des tags propre à l'axe sur l'entryline
+
+v0.1 - 04/2021
+
+TagId Distribution Amount TypeOfChange
+] ] ] CurrentPage
+
+Id du tag Distribution sur l'axe (pourcentage) Montant distribué sur l'axe (valeur) Type de changement (Creation / Update / Deletion)
+Numéro page actuelle
+
+Exemple
+{ "EntryLines": [ { "TypeOfChange": "Update", "Id": 2272792, "Label": "CHRISTIANE HILE - 1008", "DebitAmount": 0, "CreditAmount": 2.4, "Currency": "EUR", "Entry": { "Id": 533712, "Date": "2020-11-14T00:00:00Z" }, "AccountNumber": "22@", "Journal": { "Id": 32678, "Code": "VT" }, "AccountingDocument": { "Id": 414682, "Reference": "1008" } }, "Analytics": [ { "AxisId": 10, "Tags": [ { "TagId": 12,
+
+v0.1 - 04/2021
+
+"Distribution": 50, "Amount": 0, "TypeOfChange": "Creation" }, { "TagId": 13, "Distribution": 50, "Amount": 0, "TypeOfChange": "Creation" } ] } ],  ], "CurrentPage": 1 }
+
+Entries
+
+L'écriture comptable. L'endpoint suivant permet de créer des écritures comptables.
+POST Entries
+Request URL {{URLBase}}/v1/dossiers/{dossierId}/entries Method POST Paramètres path
+
+Nom du champ dossierId
+
+Format int
+
+Description Id du dossier dans Inqom
+
+v0.1 - 04/2021
+
+Paramètres Body Liste d'écritures (jusqu'à 50)
+
+Nom du champ
+
+Format
+
+Description
+
+[
+
+journalId
+
+int
+
+Id du journal
+
+Date
+
+YYYY-MM-DD
+
+Date de valeur de l'écriture
+
+AccountingDocumentId int (optionnel)
+
+Id de la pièce comptable
+
+Document (optionnel)
+
+Document / Reference String (max 256
+
+(optionnel)
+
+caractères)
+
+Référence de la pièce justificative
+
+Document / Date (optionnel)
+
+YYYY-MM-DD
+
+Date de valeur de la pièce
+
+ExternalId (optionnel) String
+
+Identificateur externe de l'écriture
+
+Lines
+
+Ligne d'écriture
+
+[
+
+Label
+
+String
+
+Libellé
+
+DebitAmount
+
+float, deux chiffres après la Montant au débit virgule maximum
+
+CreditAmount
+
+float, deux chiffres après la Montant au crédit virgule maximum
+
+Currency
+
+string 5 chars
+
+Code ISO de la Devise
+
+AccountNumber
+
+String
+
+Numéro du compte
+
+ExternalId (optionnel) String
+
+Identificateur externe de la ligne d'écriture
+
+Quantities (optionnel)
+
+Quantités sur la ligne
+
+[
+
+Type
+
+String
+
+Un parmi :
+Percent, Numeric, Set, Kilogram, Tonne, Liter, Hectoliter, CubicMeter, Hectare, Hour, KilowattHour, Milligram, Centigram, Decigram, Gram, Milliliter, Centiliter, Deciliter,
+
+v0.1 - 04/2021
+
+Value
+] Analytics [ AxisId UnitType
+Tags [ TagId Value
+Source ] ] ] ]
+
+Decaliter, Kiloliter, Millimeter, Centimeter, Decimeter, Meter, Kilometer, Decameter, Hectometer, SquareMeter, Day, Quintal, Are
+float, deux chiffres après la Valeur virgule maximum
+
+Aalytique de la ligne
+
+entier string
+
+identifiant de l'axe
+Un parmi :
+Percent, Numeric
+Liste des tags
+
+entier
+
+identifiant du tag
+
+float, deux chiffres après la Valeur virgule maximum
+
+string
+
+Utiliser : PublicApi
+
+Exemple
+[ { "JournalId": 0, "Date": "2021-06-29T10:31:11.636Z", "Document": { "Reference": "string", "Date": "2021-06-29T10:31:11.636Z" }, "ExternalId": "Facture_2541" "Lines": [ { "Label": "string", "DebitAmount": 0,
+
+v0.1 - 04/2021
+
+"CreditAmount": 0, "Currency": "string", "AccountNumber": "string", "ExternalId": "Facture_2541_Ligne_10" } ] } ]
+
+Réponse
+La création des écritures se fait de manière synchrone et en mode transactionnel. Cela implique :
+- ou bien toutes les écritures sont traitées et créées correctement - ou bien il y a une erreur dans une ou plusieurs écritures et aucune d'entre-elles ne
+sont créées
+Content-type application/json; charset=utf-8
+Response Body
+
+En cas de création, nous répondrons avec la liste des Id des écritures créées.
+
+Nom du champ [ EntryId EntryRef ExternalId [ EntryLineId ExternalId
+] ]
+
+Description
+Id de l'écriture créée Référence de la pièce justificative Identificateur externe de l'écriture
+Id de la ligne créée ExternalId correspondant passé en paramètre d'entrée
+
+En cas d'échec, nous répondrons avec les messages d'erreur appropriées et les lignes concernées.
+
+v0.1 - 04/2021
+
+Exemple
+[ { "Id": 629332, "Lines": [ { "Id": 2556690, "Label": "A", "DebitAmount": 10, "CreditAmount": 0, "AccountNumber": "4011ABC", "ExternalId": "Ext1" }, { "Id": 2556691, "Label": "A", "DebitAmount": 0, "CreditAmount": 10, "AccountNumber": "607", "ExternalId": "Ext2" } ] }
+]
+
+L'écriture comptable. L'endpoint suivant permet de modifier des écritures comptables.
+PUT Entries
+Request URL {{URLBase}}/v1/dossiers/{dossierId}/entries Method PUT Paramètres path
+
+Nom du champ dossierId
+
+Format int
+
+Description Id du dossier dans Inqom
+
+v0.1 - 04/2021
+
+Paramètres Body Liste d'écritures (jusqu'à 50)
+
+Nom du champ [ Id journalId Date Document (optionnel) Document / Reference (optionnel) Lines [ Id Label DebitAmount
+CreditAmount
+Currency AccountNumber ExternalId (optionnel)
+Quantities [ Type
+
+Format
+
+Description
+
+entier int YYYY-MM-DD
+
+Identifiant de l'écriture Id du journal Date de valeur de l'écriture
+
+String (max 256 caractères)
+
+Référence de la pièce justificative Ligne d'écriture
+
+entier
+
+Identifiant d'une ligne existante
+
+String
+
+Libellé
+
+float, deux chiffres après la Montant au débit virgule maximum
+
+float, deux chiffres après la Montant au crédit virgule maximum
+
+string 5 chars
+
+Code ISO de la Devise
+
+String
+
+Numéro du compte
+
+String
+
+Identificateur externe de la ligne d'écriture
+
+Quantités sur la ligne
+
+String
+
+Un parmi :
+Percent, Numeric, Set, Kilogram, Tonne, Liter, Hectoliter, CubicMeter, Hectare, Hour, KilowattHour, Milligram, Centigram, Decigram, Gram, Milliliter, Centiliter, Deciliter, Decaliter, Kiloliter, Millimeter, Centimeter, Decimeter, Meter, Kilometer, Decameter, Hectometer, SquareMeter, Day, Quintal, Are
+
+v0.1 - 04/2021
+
+Value
+] ] ]
+
+float, deux chiffres après la Valeur virgule maximum
+
+Exemple
+[ { "Id": 1230, "JournalId": 12340, "Date": "2021-06-29T10:31:11.636Z", "Document": { "Reference": "FactureXXX", }, "Lines": [ { "Id": 4560, "Label": "string", "DebitAmount": 10, "CreditAmount": 0, "Currency": "EUR", "AccountNumber": "411AMA" }, { "Label": "string", "DebitAmount": 0, "CreditAmount": 10, "Currency": "EUR", "AccountNumber": "512BNP" }, ] }
+]
+Analytics
+Les tags analytiques. L' endpoint suivant permet d'ajouter des tags sur des lignes d'écritures comptables.
+
+v0.1 - 04/2021
+
+POST Analytics
+Request URL {{URLBase}}/v1/dossiers/{dossierId}/analytics/entrylines/add Method POST Paramètres path
+
+Nom du champ dossierId
+
+Format int
+
+Description Id du dossier dans Inqom
+
+Paramètres Body
+Nom du champ EntryLinesAnalytics
+entryLineId axises
+axisId unit
+tags tagId value
+
+Format [] int []
+int String
+[] int decimal
+
+Description
+Liste (jusqu'à 1000) des lignes à taguer ayant pour champs :
+Id de la ligne d'écriture
+Liste des axes où l'on va ajouter un ou plusieurs tags ayant pour champs :
+Id de l'axe analytique
+Type de l'unité des tags de cet axe ayant pour valeur possible : [Percent, Numeric]
+Liste des tags ayant pour champs :
+Id du tag
+valeur du tag
+
+Exemple
+{ "EntryLinesAnalytics": [
+
+v0.1 - 04/2021
+
+{ "EntryLineId": 123456, "Axises": [ { "AxisId": 1234, "Unit": "Percent", "Tags": [ { "TagId": 456, "Value": 50 }, { "TagId": 457, "Value": 50 } ] }, { "AxisId": 1235, "Unit": "Numeric", "Tags": [ { "TagId": 458, "Value": 230 }, ] } ]
+} ] }
+Accounting Documents
+GET AccountingDocuments
+Pièces justificatives. Cet endpoint permet de récupérer des informations relatives à la pièce justificative ainsi qu'un lien de téléchargement (à suivre)
+Request
+URL {{URLBase}}/v1/dossiers/{dossierId}/accounting-documents/{accountingDocumentId}
+v0.1 - 04/2021
+
+Method GET Paramètres path
+Nom du champ dossierId accountingDocumentId
+
+Format int int
+
+Description Id du dossier dans Inqom Id du document dans Inqom
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ Id link
+
+Description
+Id de la pièce justificative
+url de téléchargement de la pièce justificative (valide 60 minutes)
+
+Exemple
+
+POST AccountingDocuments
+Pièces justificatives. Cet endpoint permet d'attacher une pièce justificative à une écriture comptable déjà existante.
+v0.1 - 04/2021
+
+Request
+URL {{URLBase}}/v1/dossiers/{dossierId}/accounting-documents
+
+Method POST
+
+Content-type Content-Type: multipart/form-data;
+
+Paramètres path
+
+Nom du champ dossierId *
+
+Format int
+
+Description Id du dossier dans Inqom
+
+Paramètres à passer dans le formulaire (form-data)
+
+Nom du champ entryId *
+date (optionnel) reference (optionnel) fileName
+
+Format int
+YYYY-MM-DD string string
+
+file *
+
+nvarchar
+
+Description
+Id de l'écriture à laquelle associer le document
+Date de valeur
+Référence
+Nom du fichier, incluant l'extension Types de fichiers acceptés : pdf, png, jpg, jpeg, xls, xlsx, doc, docx, csv, txt
+contenu du fichier
+
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Response Body Nom du champ 201 + Id
+Exemple
+
+Description Id du doc créé
+
+Letterings
+Lettrage
+
+Ajout de lettrage en masse
+Cet endpoint permet de lettrer en masse des lignes d'écriture. Sa limite est de 100 lettrages par appel.
+
+Request
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/letterings
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (body)
+
+Nom du champ CreateLetterringCommands
+
+Format []
+
+Description
+Liste (jusqu'à 100) des lettrages à créer ayant pour champs :
+
+v0.1 - 04/2021
+
+EntryLineIds
+
+int[]
+
+Exemple
+
+{ "CreateLetterringCommands": [ {
+"EntryLineIds": [ 0 ] }, ] }
+
+liste d'id de lignes à lettrer
+
+Réponse
+Content-type application/json; charset=utf-8
+Response Body
+Nom du champ CreatedLetterings [ Id EntryLineIds ]
+Exemple
+{ "CreatedLetterings": [ { "Id": 0, "EntryLineIds": [ 0 ] } ]
+}
+
+Description
+Id du lettrage liste d'id de lignes lettrées
+
+v0.1 - 04/2021
+
+Suppression de lettrage en masse
+Cet endpoint permet de supprimer en masse le lettrage. Sa limite est de 100 ids de lettrage par appel.
+
+Request
+
+URL {{URLBase}}/v1/dossiers/{dossierId}/letterings
+
+Method DELETE
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (body)
+
+Nom du champ LetteringIds
+Exemple
+{ "LetteringIds": [ 0, 2, 3 ] }
+
+Format int[]
+
+Description
+liste d'id de lettrage à supprimer
+
+Réponse
+Content-type application/json; charset=utf-8
+
+v0.1 - 04/2021
+
+Response Body 204 - NoContent
+
+A-Nouveaux
+
+Lecture A-Nouveaux virtuel
+Cet endpoint permet de récupérer les a-nouveaux virtuel d'un exercice comptable Request URL {{URLBase}}/v1/dossier/{dossierId}/anouveaux/virtual
+
+Method POST
+Paramètres path
+
+Nom du champ dossierId * beginDate *
+
+Format
+
+Description
+
+int
+
+Id du dossier dans Inqom
+
+Date et heure
+
+Date de début de l'exercice
+
+(YYYY-MM-DDTHH:MM:SS-0 comtpable
+
+0:00)
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ
+
+Description
+
+v0.1 - 04/2021
+
+Id EnterpriseId JournalId JounrlaName EntryRef Date ExerciseId Label ValidationDate ValidateDate ValidationNumber DocRef FileId DocDate TransactionId Source SourceId Conf Warning BankManaged OperationId LastUpdateDate UserInfo UserInfo / Id UserInfo / UrlAvatar UserInfo / FirstName UserInfo / LastName UserInfo / Email
+
+Id Id de l'entreprise Id du journal Nom du journal
+Id de l'exercise Label de l'anouveaux Date de validation
+Reférence du document Id du document lié Date du document
+Type de source Id de la source
+Date de dernière modification
+Id de l'utilisateur Lien vers l'avatar de l'utilisateur Prénom de l'utilisateur Nom de l'utilisateur Email de l'utilisateur
+v0.1 - 04/2021
+
+Lines [ EnterpriseId Id EntryId Label BookAccountDto BookAccountDto / ContactId BookAccountDto / Managed BookAccountDto / Impactable BookAccountDto / Dividable BookAccountDto / AuxAccount BookAccountDto / Divided BookAccountDto / IsAux BookAccountDto / IsSub BookAccountDto / MappingAccount BookAccountDto / BookOperationId BookAccountDto / EnterpriseId BookAccountDto / Account BookAccountDto / AccountClass BookAccountDto / AccountLabel BookAccountDto / AccountName BookAccountDto / AccountDescription BookAccountDto / SubAccountLabel BookAccountDto / SubAccountCode BookAccountDto / AccountId BookAccountDto / SubAccountId DebitAmount
+
+Id de l'entreprise Id de l'entry line Id de l'entry Label de l'entry line
+Compte managé (oui / non) Compte impactabe (oui / non) Compte divisable (oui / non) Numero Compte auxiliaire Compte divisé (oui / non) Est-ce un compte auxiliaire (oui / non) Est-ce un sous compte (oui / non) Mapping relatif au compte
+Id de l'entreprise Numéro de Compte Classe du compte Label du compte Nom du compte Description du compte Description du sous compte Code du sous compte Id du compte Id du sous compte Montant en débit
+
+v0.1 - 04/2021
+
+CreditAmount CurrencyId Currency MatchedId MatchedLetter MatchedDate MatchedLetterOrientation CreatedAt RuleId Warning Type CutOffType BookEnterpriseLineAccosiation [ BookEntryLineId SourceId AssociationModule AssociationType ] FxCurrencyId FxDate FxRate BankManaged Revision ReAllocated ReAllocatedAt ReAllocatedByUserId SourceId
+
+Montant en crédit Id de la monnais Symbole de la monnais Id du lettrage Lettre du lettrage Date du lettrage Orientation du lettrage Date de création de l'entry line
+Status de la révision
+Source I de l'entry line
+
+v0.1 - 04/2021
+
+SourceType DeletedAt MatchedType Analytic [ AxisId Tags
+[ TagId Distribution Amount ] ] ] IsPartialLettering
+
+Type de source de l'entry line Si supprimé, date de suppression
+Id de l'axe analytique
+Id du tag analytique Distribution en pourcentage Montant monétaire
+Lettrage partiel (oui / non)
+
+Exemple
+{ "Id": 0, "EnterpriseId": 0, "JournalId": 0, "JournalName": "string", "EntryRef": "string", "Date": "2023-01-31T10:20:03.750Z", "ExerciseId": 0, "Label": "string", "ValidationDate": "2023-01-31T10:20:03.750Z", "ValidateDate": "2023-01-31T10:20:03.750Z", "ValidationNumber": 0, "DocRef": "string", "FileId": 0, "DocDate": "2023-01-31T10:20:03.750Z", "TransactionId": 0, "Source": "ByUser", "SourceId": "string", "Conf": 0, "Warning": "string", "BankManaged": true,
+
+v0.1 - 04/2021
+
+"OperationId": 0, "LastUpdateDate": "2023-01-31T10:20:03.750Z", "UserInfo": {
+"Id": 0, "UrlAvatar": "string", "FirstName": "string", "LastName": "string", "Email": "string" }, "Lines": [ {
+"EnterpriseId": 0, "Id": 0, "EntryId": 0, "Label": "string", "BookAccountDto": {
+"ContactId": 0, "Managed": true, "Impactable": true, "Dividable": true, "AuxAccount": 0, "Divided": "None", "IsAux": true, "IsSub": true, "MappingAccount": 0, "BookOperationId": 0, "EnterpriseId": 0, "Account": 0, "AccountClass": 0, "AccountLabel": "string", "AccountName": "string", "AccountDescription": "string", "SubAccountLabel": "string", "SubAccountCode": "string", "AccountId": 0, "SubAccountId": 0 }, "DebitAmount": 0, "CreditAmount": 0, "CurrencyId": 0, "Currency": "string", "MatchedId": 0, "MatchedLetter": "string", "MatchedDate": "2023-01-31T10:20:03.750Z", "MatchedLetterOrientation": "PreviousExercise", "CreatedAt": "2023-01-31T10:20:03.750Z", "RuleId": "string", "Warning": "string", "Type": "None", "CutOffType": "None", "BookEntryLineAssociations": [ {
+"BookEntryLineId": 0, "SourceId": 0, "AssociationModule": "Unknown", "AssociationType": "Unknown"
+v0.1 - 04/2021
+
+} ], "FxCurrencyId": 0, "FxDate": "2023-01-31T10:20:03.750Z", "FxRate": 0, "BankManaged": true, "Revision": "Unrevised", "ReAllocated": true, "ReAllocatedAt": "2023-01-31T10:20:03.750Z", "ReAllocatedByUserId": 0, "SourceId": "string", "SourceType": "Unknown", "DeletedAt": "2023-01-31T10:20:03.750Z", "MatchedType": "Unknown", "Analytics": [
+{ "AxisId": 1, "Tags": [ { "TagId": 1, "Distribution": 50, "Amount": 0 } ]
+} ], "IsPartialLettering": true } ] }
+Balances
+Lecture de la balance v1
+Cet endpoint permet de récupérer la balance d'un exercice comptable
+Request
+URL /v1/dossiers/{dossierId}/balances
+Method GET
+Paramètres path
+v0.1 - 04/2021
+
+Nom du champ dossierId *
+Paramètres query
+
+Format int
+
+Description Id du dossier dans Inqom
+
+Nom du champ startDate endDate balanceScope accountNumbers
+
+Format Date Date Enumération Liste
+
+Description Date de début de période Date de fin de période Un parmi [Impacted, All] Liste de compte à filtrer
+
+Exemple
+
+https://wa-fred-accounting-services-prod.azurewebsites.net/v1/dossiers/2903/balances?startDate=2024-01-0 1&endDate=2024-12-31&accountNumbers=401,411&balanceScope=All
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ [ Account/Number Account/Label LineCount DebitBalance CreditBalance DebitAmount CreditAmount DebitAmountBroughtForward
+
+Description
+Numéro du compte Libellé du compte Nombre de lignes Solde du compte débiteur Solde du compte créditeur Total des comptes au débit Total des comptes au drédit Solde a-nouveau débiteur
+
+v0.1 - 04/2021
+
+CreditAmountBroughtForward UnletteredOrCrossLetteredLineCount AuxiliaryBalance [ Account/Number Account/Label Account/ParentAccountNumber LineCount DebitBalance CreditBalance DebitAmount CreditAmount DebitAmountBroughtForward CreditAmountBroughtForward ] ]
+
+Solde a-nouveau créditeur Lignes non lettrées Liste des balances des comptes auxiliaire
+Numéro du compte Libellé du compte Compte parent Nombre de lignes Solde du compte débiteur Solde du compte créditeur
+Solde a-nouveau débiteur Solde a-nouveau créditeur
+
+Exemple
+[ { "Account": { "Number": "401", "Label": "FOURNISSEURS" }, "LineCount": 4, "DebitBalance": 0, "CreditBalance": 6223.65, "DebitAmount": 0, "CreditAmount": 6223.65, "CreditAmountBroughtForward": 5223.65, "DebitAmountBroughtForward": 0, "UnletteredOrCrossLetteredLineCount": 4, "AuxiliaryBalance": [ { "Account": { "Number": "401FDLIA", "Label": "DLIA",
+
+v0.1 - 04/2021
+
+"ParentAccountNumber": "401" }, "LineCount": 1, "DebitBalance": 0, "CreditBalance": 250, "DebitAmount": 0, "CreditAmount": 250, "CreditAmountBroughtForward": 250, "DebitAmountBroughtForward": 0, "UnletteredOrCrossLetteredLineCount": 1 } ] } ]
+
+Lecture de la balance avancée
+Cet endpoint permet de récupérer la balance d'un exercice comptable Request URL /api/app/enterprises/{dossierId}/balances/by-query
+
+Method POST Paramètres path
+Nom du champ dossierId *
+Paramètres body
+Nom du champ Current/Start Current/End Filter
+
+Format int
+Format Date Date Enumération
+
+Description Id du dossier dans Inqom
+Description Date de début de période Date de fin de période Un parmi [Impacted,
+Created, UnBalanced, UnReviewed, BalancedWithUnlettered,
+
+v0.1 - 04/2021
+
+ANouveauFilter
+
+Enumération
+
+Aggregation WithRevision ExcludeJournalsIds
+
+Enumération Booléen Liste d'entier
+
+Exemple
+{ "Current": { "Start": "2024-01-01", "End": "2024-12-31" }, "Filter": "UnBalanced", "ANouveauFilter": "Normal", "Aggregation": "AuxDetailed", "WithRevision": false, "ExcludeJournalIds": [] }
+Réponse
+Content-type application/json; charset=utf-8
+Response Body
+
+Abnormal, AllAccount,
+AllImpactableAccounts] Unbalanced : compte non soldés AllAccount : tous les comptes
+Un parmi [Normal, Without, Only] Normal : avec AN ou AN virtuel Without : sans AN Only : uniquement l'AN (balance d'ouverture)
+Utiliser "AuxDetailed"
+Mettre à "false"
+Identifiants des journaux à exclure
+
+Nom du champ Balances Account/AccountId Account/SubAccountId
+
+Description Tableau des balances par compte Id du compte Id du sous- compte
+
+v0.1 - 04/2021
+
+Account/Account Account/AccountLabel Account/SubAccountCode Account/IsAux Current/Debit Current/Credit
+
+Numéro du compte Libellé du compte Code du sous-compte Sous-compte de type auxiliaire Solde du compte débiteur Solde du compte créditeur
+
+Exemple
+[ { "Account": { "AccountId": 383, "Account": 28184, "AccountLabel": "Mobilier", "IsAux": false }, "Current": { "Debit": 0, "Credit": 4172.5 } }, { "Account": { "AccountId": 548, "SubAccountId": 5243716, "Account": 4011, "AccountLabel": "ACTION EXPERTS", "SubAccountCode": "ACTIONEXPERTS", "IsAux": true }, "Current": { "Debit": 0, "Credit": 14190 } }
+]
+
+Import FEC ou Balance
+Afin d'importer un FEC ou une Balance dans Inqom, il y a des pré-requis et plusieurs étapes sont nécessaires. Le mode Balance repose sur un format spécifique Inqom.
+Pré-requis
+ Il faut que le dossier comptable soit créé auparavant.
+v0.1 - 04/2021
+
+ L'exercice de destination des écritures doit être créé.
+
+Pré-mapping (utilisation avancée)
+Il est possible de définir pour l'ensemble des imports d'un dossier, un template de mapping des comptes et des journaux. Ces templates permettent de faire des transformations afin d'adapter les données d'entrée.
+
+Étapes de l'import
+ Création de l'opération d'import  Soit import FEC en donnant l'exercice de destination  Soit import Balance en donnant le journal et la date de l'écriture générée
+ L'opération est analysé en arrière plan  Création des mappings en arrière plan (utilisation des templates de mapping si
+existant)  Résolution des problèmes si existant  Mapping des journaux  Mapping des comptes  Mapping de l'analytique (optionnel)  Intégration des écritures en arrière plan  Intégration des lettrages en arrière plan  Intégration de l'analytique en arrière plan (optionnel)  Suppression des écritures existantes de l'exercice en arrière plan (mode Remplacer)
+
+Template mapping comptes (utilisation avancée)
+Un fichier de template de mapping comptes peut être utilisé afin de faciliter le mapping des comptes importés.
+
+URL
+{{URLBase}}/api/app/enterprises/{dossierId}/operations/account-mappings/import-templat e
+
+Method POST
+
+Paramètres (path) Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (formData)
+
+Nom du champ file
+
+Description Fichier template
+
+v0.1 - 04/2021
+
+Le type mime doit être défini parmi une de ces valeurs [text/plain, text/csv]
+Format du fichier Fichier à plat CSV ayant le symbole ; comme séparateur et ayant une ligne d'en-tête. Deux colonnes :
+1. Critère sur le compte importé (Chaîne de caractères ou Expression régulière) 2. Compte en sortie (Chaîne de caractères, Substitution de l'expression régulière)
+Fonctionnement A l'import d'un fichier FEC, chaque compte du fichier va être analysé afin de retrouver un équivalent dans Inqom. S'il existe un template de mapping comptes, celui-ci va être utilisé en premier lieu. Pour chaque compte à l'import, Inqom va parcourir le template et utiliser la première règle dont le critère sur le compte va correspondre afin d'appliquer la règle de mapping. Le deuxième champ permet de déterminer le compte en sortie à utiliser dans Inqom. Exemples Sans Expression régulière Template
+None compte_in;compte_out 10;101 2812;28122
+Evaluation
+None Compte importé;Compte Inqom;Ligne du template utilisée 102;102;aucune 10;101;ligne 1 28;28;aucune 2812;28122;ligne 2
+v0.1 - 04/2021
+
+Avec Expression régulière
+Template
+None Account in;Account Out ^0(.*)$;401$1 ^401$;4012 ^401F(.*)$;401$1 ^411C(.*)$;411$1 ^4(.*)$;401$1
+Evaluation
+None Compte importé;Compte Inqom;Ligne du template utilisée 401Test;40101Test;ligne 5 401;4012;ligne2 0APPLE;401APPLE;ligne 1 123;123;aucune 401FAMAZON;401AMAZON;ligne 3 411COURTAGES;411OURTAGES;ligne4
+
+Template mapping journaux (utilisation avancée)
+Un fichier de template de mapping journaux peut être utilisé afin de faciliter le mapping des codes journaux importés.
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/journal-mappings/import-template
+
+Method POST
+
+Paramètres (path) Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (formData)
+
+Nom du champ file
+
+Description Fichier template
+
+v0.1 - 04/2021
+
+Le type mime doit être défini parmi une de ces valeurs [text/plain, text/csv]
+Format du fichier Fichier à plat CSV ayant le symbole ; comme séparateur et ayant une ligne d'en-tête. Cinq colonnes :
+3. Critère sur le code journal importé (Chaîne de caractères, Expression régulière ou Vide)
+4. Critère sur le libellé journal importé (Chaîne de caractères, Expression régulière ou Vide)
+5. Code journal renommé (Chaîne de caractères, Substitution de l'expression régulière ou Vide)
+6. Type de journal, une valeur parmi a. Buy b. Sell c. Bank d. Misc (correspond aux opérations diverses) e. Cash f. Salary g. ANouveaux h. Depreciation i. CutOff j. Loan k. Lease l. Situation
+7. Libellé du journal s'il doit être créé (Chaîne de caractères, Substitution de l'expression régulière ou Vide)
+Fonctionnement A l'import d'un fichier, chaque journal du fichier va être analysé afin de retrouver un équivalent dans Inqom. S'il existe un template de mapping journaux, il va être utilisé en premier lieu.
+Pour chaque journal à l'import, Inqom va parcourir le template et utiliser la première règle dont les critères sur le code et libellé vont correspondre afin d'appliquer la règle de mapping. Les trois derniers champs permettent de sélectionner ou créer le bon journal dans Inqom.
+v0.1 - 04/2021
+
+Exemples Sans Expression régulière Template
+None code_in;libellé_in;code_out;type_out;libellé_out CA;Crédit Agricole;BQ1;Bank; ;Crédit Agricole;;Bank; CA;;CASH;Cash;Caisse renommée ;;MISC;Misc;Autres
+Evaluation
+None Code importé;Libellé importé;Code créé;Type créé;Libellé créé;Remarque CA;Crédit Agricole;BQ1;Bank;Crédit Agricole;Règle 1, renommage Code CC;Crédit Agricole;CC;Bank;Crédit Agricole;Règle 2 CA;Ma Caisse;CASH;Cash;Caisse renommée; Règle 3, renommage Code et Libellé TT;Tout le reste;MISC;Misc;Autres;Règle 4, renommage Code et Libellé
+Avec Expression régulière Template
+None code_in;libellé_in;code_out;type_out;libellé_out CA;Cr.*(Ag.*);BQ1;Bank;Crédit Agricole
+Evaluation
+None Code importé;Libellé importé;Code créé;Type créé;Libellé créé CA;Crédit Agricole;BQ1;Bank;Crédit Agricole CA;CrAgr;BQ1;Bank;Crédit Agricole
+v0.1 - 04/2021
+
+Qui ne fonctionne pas !
+Template
+None code_in;libellé_in;code_out;type_out;libellé_out SA;;;Misc; CA;Cr.*(Ag.*);BQ1;Bank;Crédit Agricole CA;CrAg;BQ1;Misc;Crédit Agricole
+Evaluation
+None Code importé;Libellé importé;Code créé;Type créé;Libellé créé SA;Salaire;SA;Misc;Salaire => le journal SA existe déjà de type Salary CA;Crédit Agr;BQ1;Bank;Crédit Agricole CA;CrAgr;BQ1;Misc;Crédit Agricole => Le journal a déjà été créé avec le type Bank
+Autre exemple
+Template
+None code_in;libellé_in;code_out;type_out;libellé_out CA;Cr.*Ag.*;BQ1;Bank; SG;;BQ2;Bank; CM;;BQ3;Bank; CIC;;BQ4;Bank; PA;;OD;Misc; PAI;;OD;Misc; PAY;;OD;Misc; SA;;OD;Misc; SAL;;OD;Misc; PAIE;;OD;Misc; CA;;;Caisse; EXT;;;CutOff; 06;;;Buy; 07;;;Sell; 02;;;Misc;
+
+Journaux préexistant dans Inqom
+
+Type  Buy  Sell 
+
+Name Description HA Achat VT Vente
+
+v0.1 - 04/2021
+
+Bank 
+
+BQ
+
+Misc 
+
+OD
+
+Cash 
+
+CA
+
+Salary 
+
+SA
+
+ANouveaux AN
+
+Depreciation IM
+
+Situation SIT
+
+CutOff 
+
+CO
+
+Loan 
+
+EM
+
+Lease 
+
+CB
+
+Banque Opérations Diverses Caisse Salaire A Nouveaux Dotation aux amortissements Situations Cut-off Emprunts Crédits-baux
+
+Création de l'opération d'import FEC
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (body)
+
+Nom du champ file
+exerciseId operationType
+
+Description
+Fichier FEC Le type mime doit être défini parmi une de ces valeurs [text/plain, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocu ment.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabl ed.12, application/zip] (Pour le type zip, il ne doit contenir qu'un seul fichier de type texte.)
+Id de l'exercice
+Une des valeurs suivantes [ReplaceAll, KeepExisting]. ReplaceAll supprime toutes écritures existantes sur l'exercice alors que
+
+v0.1 - 04/2021
+
+temporary closeExercise shouldValidateEntries
+
+KeepExisting conserve celles-ci.
+Indique si c'est un FEC temporaire (non conforme)
+Indique si le FEC provient d'un exercice clos et clôturera également celui dans Inqom (Irréversible)
+Indique si les écritures validées dans le FEC doivent l'être également dans Inqom
+
+fileName withAnalytics
+withQuantities
+keepAccountLabels
+markLinesAsRevised keepLinesWithZeroAmount fileAttachmentImportType
+
+Permet d'indiquer un autre nom de fichier
+Indique si c'est un import FEC avec Analytique (format défini par Inqom en annexe)
+Indique si c'est un import FEC avec des quantités (format défini par Inqom en annexe)
+Indique s'il faut conserver les intitulés de comptes provenant du FEC à l'exception de ceux modifiés dans le paramétrage du plan de compte
+Indique s'il faut marquer les lignes à Vues
+Indique s'il faut conserver les lignes sans débit ou crédit
+Une des valeurs suivantes [None, NomFichier, PieceRef]. Si différent de None, permet de rattacher les écritures aux pièces préalablement ajoutées en "Autre" via une nouvelle colonne NomFichier ou de la colonne existante PieceRef.
+
+v0.1 - 04/2021
+
+Réponse
+Content-type application/json; charset=utf-8
+Response Body
+Nom du champ id EnterpriseId ExerciseId
+Exemple
+{ "Id": 8382, "EnterpriseId": 4552, "ExerciseId": 2157
+}
+
+Description Id de l'opération Id du dossier Id de l'exercice
+
+Création de l'opération d'import de Balance
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/import-balance
+
+Method POST
+
+Paramètres (path) Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (formData)
+
+Nom du champ file
+
+Description
+Fichier Balance Le type mime doit être défini parmi une de ces valeurs [text/plain, text/csv, application/vnd.ms-excel,
+
+v0.1 - 04/2021
+
+Type
+journalId entryDate
+
+application/vnd.openxmlformats-officedocu ment.spreadsheetml.sheet, application/vnd.ms-excel.sheet.macroEnabl ed.12]
+Une des valeurs suivantes [OpeningBalance, PeriodicBalanceWithoutAn, PeriodicBalanceWithAn].
+Id du journal à utiliser
+Date de l'écriture à générer
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ id EnterpriseId
+Exemple
+{ "Id": 8382, "EnterpriseId": 4552
+}
+
+Description Id de l'opération Id du dossier
+
+Lecture de l'opération d'import FEC
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{id}
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ
+
+Description
+
+v0.1 - 04/2021
+
+dossierId id
+
+Id du dossier dans Inqom Id de l'opération
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ id EnterpriseId ExerciseId JournalId Status
+
+Description
+Id de l'opération
+Id du dossier
+Id de l'exercice (import FEC)
+Id du journal (import de balance)
+Un des états suivants :  Received : fichier uploadé, analyse non encore démarré  ReadFileFail : erreur de lecture du fichier  ParsingStart : analyse en cours  ParsingFail : erreur d'analyse du fichier  ParsingOk : analyse effectué, mapping en cours  WaitingUserAction : analyse et mapping effectués, l'utilisateur doit passer à l'étape suivante afin de vérifier les problèmes et les mappings  Succeeded : intégration terminée  Remove : suppression des écritures de l'import effectué  EntryIntegrationPending : en attente de l'intégration des écritures  EntryIntegration : intégration des écritures en cours  Lettering : intégration des lettrages en cours  ExerciseReplace : suppression des écritures existante en cours (mode ReplaceAll)  ExerciseClosing : Clôture de l'exercice en cours (mode import clôt)  RollBack : Annulation de l'import en cours suite à une erreur d'intégration  IntegrationFailed : Erreur lors de l'intégration  Purged : Données intermédiaires supprimés
+
+v0.1 - 04/2021
+
+OperationType
+FileType
+PostImportProcess
+EntriesCount
+EntryLinesCount
+LetteredEntryLinesCount
+BeginFileDate EndFileDate
+Exemple
+{ "Id": 1245, "FileName": "FEC20230228.txt", "FileType": "Fec", "Status": "WaitingUserAction", "OperationType": "ReplaceAll", "WithAnalytics": true, "ExerciseId": 4571, "EnterpriseId": 124, "EntriesCount": 120, "LetteredEntryLinesCount": 54, "EntryLinesCount": 350, "BeginFileDate": "2023-01-01", "EndFileDate": "2023-04-25" }
+
+Une des valeurs suivantes [ReplaceAll, KeepExisting]. ReplaceAll supprime toutes écritures existantes sur l'exercice alors que KeepExisting conserve celles-ci.
+Une des valeurs suivantes [Fec, TemporaryFec, FredImport, OpeningBalance, PeriodicBalanceWithoutAn, PeriodicBalanceWithAn]
+Une des valeurs suivantes [None, ShouldValidateEntries, CloseExercise]
+Nombre d'écritures (renseigné après l'étape d'analyse)
+Nombre de lignes d'écritures (renseigné après l'étape d'analyse)
+Nombre de lettrage (renseigné après l'étape d'analyse)
+Première date d'écriture du FEC importé
+Dernière date d'écriture du FEC importé
+
+Lecture des problèmes d'une opération d'import FEC (statut WaitingUserAction)
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{id}/issues
+
+v0.1 - 04/2021
+
+Method GET
+Paramètres (path) Nom du champ dossierId id
+
+Description Id du dossier dans Inqom Id de l'opération
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Tableau de : operationId Message IssueCode NumberIssue Solved Lines []
+
+Description
+Id de l'opération Description du problème Code du problème Nombre de problème Indique si le problème est résolu Liste des lignes ayant ce problème
+
+Exemple
+
+[
+
+
+
+{
+
+
+
+"Message": "Écritures avec plusieurs références de pièces. Action : utiliser la première référence pour
+
+
+
+toutes les écritures.",
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+"OperationId": 35754,
+
+
+
+"NumberIssue": 2,
+
+
+
+"Solved": false,
+
+
+
+"Lines": [
+
+
+
+
+
+{
+
+
+
+
+
+"Id": 18844595,
+
+
+
+
+
+"Identifier": "VT-13385",
+
+v0.1 - 04/2021
+
+
+
+
+
+"Type": "BookEntryNum",
+
+
+
+
+
+"Message": "Ecriture VT-13385",
+
+
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+
+
+"Solved": false
+
+
+
+
+
+},
+
+
+
+
+
+{
+
+
+
+
+
+"Id": 18844594,
+
+
+
+
+
+"Identifier": "VT-8574",
+
+
+
+
+
+"Type": "BookEntryNum",
+
+
+
+
+
+"Message": "Ecriture VT-8574",
+
+
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+
+
+"Solved": false
+
+
+
+
+
+}
+
+
+
+]
+
+
+
+}
+
+]
+
+Résolution des problèmes d'une opération d'import FEC (statut WaitingUserAction)
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{id}/issues/resolve-all
+
+Method POST
+
+Paramètres (path) Nom du champ dossierId id
+
+Description Id du dossier dans Inqom Id de l'opération
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+Nom du champ Tableau de : operationId
+
+Description Id de l'opération v0.1 - 04/2021
+
+Message IssueCode NumberIssue Solved Lines []
+
+Description du problème Code du problème Nombre de problème Indique si le problème est résolu Liste des lignes ayant ce problème
+
+Exemple
+
+[
+
+
+
+{
+
+
+
+"Message": "Écritures avec plusieurs références de pièces. Action : utiliser la première référence pour
+
+
+
+toutes les écritures.",
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+"OperationId": 35754,
+
+
+
+"NumberIssue": 2,
+
+
+
+"Solved": false,
+
+
+
+"Lines": [
+
+
+
+
+
+{
+
+
+
+
+
+"Id": 18844595,
+
+
+
+
+
+"Identifier": "VT-13385",
+
+
+
+
+
+"Type": "BookEntryNum",
+
+
+
+
+
+"Message": "Ecriture VT-13385",
+
+
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+
+
+"Solved": false
+
+
+
+
+
+},
+
+
+
+
+
+{
+
+
+
+
+
+"Id": 18844594,
+
+
+
+
+
+"Identifier": "VT-8574",
+
+
+
+
+
+"Type": "BookEntryNum",
+
+
+
+
+
+"Message": "Ecriture VT-8574",
+
+
+
+
+
+"IssueCode": "HasSeveralPieceRef",
+
+
+
+
+
+"Solved": false
+
+
+
+
+
+}
+
+
+
+]
+
+
+
+}
+
+]
+
+Lecture des mapping des journaux (statut WaitingUserAction)
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{id}/journal-mappings
+Method GET
+
+v0.1 - 04/2021
+
+Paramètres (path) Nom du champ dossierId id
+
+Description Id du dossier dans Inqom Id de l'opération
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Tableau de : Id SourceName SourceDescription Destination
+
+Description
+Id du mapping Code du journal dans le FEC Description du journal dans le FEC Journal de destination dans Inqom (peut être non renseigné si le mapping automatique n'a pas trouvé de correspondance)
+
+Exemple
+
+[
+
+
+
+{
+
+
+
+
+
+"Id": 108024,
+
+
+
+
+
+"SourceName": "VT",
+
+
+
+
+
+"SourceDescription": "VT",
+
+
+
+
+
+"Destination": {
+
+
+
+
+
+
+
+"Id": 75456,
+
+
+
+
+
+
+
+"Type": "Sell",
+
+
+
+
+
+
+
+"TypeDescription": "Vente",
+
+
+
+
+
+
+
+"Name": "VT",
+
+
+
+
+
+
+
+"Description": "Vente",
+
+
+
+
+
+
+
+"EnterpriseId": 8209
+
+
+
+
+
+}
+
+
+
+},
+
+
+
+{
+
+
+
+
+
+"Id": 108026,
+
+
+
+
+
+"SourceName": "ADEF",
+
+
+
+
+
+"SourceDescription": "ADEF"
+
+v0.1 - 04/2021
+
+
+
+}
+
+]
+
+Mapping d'un journal du FEC avec un journal Inqom (statut WaitingUserAction)
+
+URL
+{{URLBase}}/api/app/enterprises/{dossierId}/operations/{operationId}/journal-mappings/{jo urnalMappingId}
+
+Method PUT
+
+Paramètres (path) Nom du champ dossierId operationId journalMappingId
+
+Description Id du dossier dans Inqom Id de l'opération d'import FEC Id du mapping de journal
+
+Paramètres (body)
+
+Nom du champ journalId
+
+Description Id du journal Inqom
+
+Lecture des mapping des comptes (statut WaitingUserAction)
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{id}/account-mappings
+
+Method GET
+
+Paramètres (path)
+
+Nom du champ dossierId id
+
+Description Id du dossier dans Inqom Id de l'opération
+
+v0.1 - 04/2021
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Tableau de : Id ImportedAccount ImportedAccountLabel ImportedSubAccount ImportedSubAccountLabel DestinationAccount MappingAccounState
+
+Description
+Id du mapping
+Numéro de compte importé
+Label du compte importé
+Auxiliaire du compte importé
+Label de l'auxiliaire du compte importé
+Compte Inqom de destination
+Statut du mapping, une valeure parmi :  ApiSuggested : suggestion automatique  UserMapped : mappé par l'utilisateur  ParentDivisionNotAllowedError : mapping en erreur, le compte parent n'est pas divisible  ImpactNotAllowedError : mapping en erreur, le compte n'est pas impactable  AuxCodeFormatError : mapping en erreur, le format du sous-compte n'est pas valide  ManagedAccountError : mapping en erreur, compte bancaire connecté
+
+Exemple
+
+[
+
+
+
+{
+
+
+
+
+
+"ImportedAccount": 1013,
+
+
+
+
+
+"ImportedAccountLabel": "CAPITAL SOUSCRIT APPELE VERSE",
+
+
+
+
+
+"DestinationAccount": {
+
+
+
+
+
+
+
+"AccountId": 7,
+
+
+
+
+
+
+
+"EnterpriseId": 8209,
+
+
+
+
+
+
+
+"Account": 10131,
+
+
+
+
+
+
+
+"AccountClass": 1,
+
+
+
+
+
+
+
+"AccountLabel": "Capital non amorti",
+
+
+
+
+
+
+
+"AccountName": "10131",
+
+
+
+
+
+
+
+"AccountDescription": "Capital non amorti",
+
+v0.1 - 04/2021
+
+
+
+
+
+
+
+"Impactable": true,
+
+
+
+
+
+
+
+"Dividable": true,
+
+
+
+
+
+
+
+"Divided": "None",
+
+
+
+
+
+
+
+"IsAux": false,
+
+
+
+
+
+
+
+"IsManaged": false
+
+
+
+
+
+},
+
+
+
+
+
+"MappingAccountState": "ApiSuggested",
+
+
+
+
+
+"Id": 1734448
+
+
+
+}
+
+]
+
+Mapping d'un compte du FEC avec un compte Inqom (statut WaitingUserAction)
+
+URL
+{{URLBase}}/api/app/enterprises/{dossierId}/operations/{operationId}/account-mappings/{ accountMappingId}
+
+Method PUT
+
+Paramètres (path) Nom du champ dossierId operationId accountMappingId
+
+Description Id du dossier dans Inqom Id de l'opération d'import FEC Id du mapping du compte
+
+Paramètres (body)
+
+Nom du champ accountId subAccountId
+
+Description Id du compte Inqom Id du sous-compte Inqom
+
+Lecture des mapping des tags (statut WaitingUserAction)
+URL {{URLBase}}/api/app/enterprises/{dossierId}/analytics-mappings/by-operation/{id}
+
+v0.1 - 04/2021
+
+Method GET
+Paramètres (path) Nom du champ dossierId id
+
+Description Id du dossier dans Inqom Id de l'opération
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Tableau de : Id AxisName TagName AxisId TagId State
+
+Description
+Id du mapping Nom de l'axe importé Nom du tag importé Id de l'axe Inqom Id du tag Inqom Statut du mapping, une valeure parmi :
+ ApiSuggested : suggestion automatique  UserMapped : mappé par l'utilisateur
+
+Exemple
+
+[
+
+
+
+{
+
+
+
+
+
+"Id": 1463,
+
+
+
+
+
+"AxisName": "Pays",
+
+
+
+
+
+"TagName": "France",
+
+
+
+
+
+"AxisId": 124,
+
+
+
+
+
+"TagId": 456,
+
+
+
+
+
+"State": "ApiSuggested"
+
+
+
+}
+
+]
+
+v0.1 - 04/2021
+
+Mapping d'un axe/tag du FEC avec un axe/tag Inqom (statut WaitingUserAction)
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/analytics-mappings/{analyticsMappingId}
+
+Method PUT
+
+Paramètres (path) Nom du champ dossierId analyticsMappingId
+
+Description Id du dossier dans Inqom Id du mapping de l'axe/tag
+
+Paramètres (body)
+
+Nom du champ axisId tagId
+
+Description Id de l'axe Inqom Id du tag Inqom
+
+Intégration du FEC (statut WaitingUserAction)
+Une fois que tous les problèmes sont résolus, les journaux et comptes sont correctement mappés. Il faut passer à l'étape suivante avec l'intégration des écritures en utilisant ce end point.
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{operationId}/integrate
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId operationId
+
+Description Id du dossier dans Inqom Id de l'opération d'import FEC
+
+v0.1 - 04/2021
+
+Suppression d'un import FEC
+Supprime l'opération ainsi que les écritures associées
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/operations/{operationId}
+
+Method DELETE
+
+Paramètres (path)
+
+Nom du champ dossierId operationId
+
+Description Id du dossier dans Inqom Id de l'opération d'import FEC
+
+Export FEC
+
+Création d'une demande d'export FEC
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/entries/exports/enqueue-fec
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (query)
+
+Nom du champ exerciseId beginDate endDate
+
+Description
+Id de l'exercice (obligatoire si beginDate et endDate ne sont pas définies)
+date de début (obligatoire si exerciseId n'est pas définie)
+date de fin (obligatoire si exerciseId n'est pas définie)
+
+v0.1 - 04/2021
+
+createdAfter exportType
+excludeEntriesOnSitJournal
+
+écritures créées après la date (facultatif)
+une valeur parmi :  None : FEC standard  StandardAnalytic : FEC avec Analytique
+exclure les écritures du journal Situation (facultatif)
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Id
+
+Exemple
+
+{
+
+
+
+"Id": 1463
+
+}
+
+Description Id de l'export
+
+Consultation d'une demande d'export FEC
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/entries/exports/{exportId}
+
+Method GET
+
+Paramètres (path) Nom du champ dossierId exportId generatePublicUrl
+
+Description
+Id du dossier dans Inqom
+Id de l'export
+Indique s'il faut générer une url publique vers le fichier généré (facultatif, par défaut :
+
+v0.1 - 04/2021
+
+faux)
+
+Réponse Content-type application/json; charset=utf-8 Response Body
+
+Nom du champ Id ExerciseId FileUrl
+bookexportType
+entryLinesCount Status
+
+Description
+Id de l'export
+Id de l'exercice
+Url de téléchargement du fichier (Status = Success et generatePublicUrl vrai)
+une valeur parmi :  None : FEC standard  StandardAnalytic : FEC avec Analytique
+Nombre de lignes dans l'export
+Une valeur parmi :  Pending : non traité  InProgress : en cours de traitement  Success : export généré  Error : une erreur a été rencontré lors de la génération
+
+Exemple
+
+{ "Id": 124, "ExerciseId": 452, "FileUrl": "http://storage.blob.core.windows.net/", "BookExportType": "None", "EntryLinesCount": 652, "Status": "Success" }
+
+v0.1 - 04/2021
+
+Transformation TRA en FEC
+
+Génération d'un fichier zip contenant les FEC par exercice contenu dans le TRA
+Si le TRA contient 3 exercices, le zip retourné contiendra trois FEC correspondants aux exercices. Si le TRA contient de l'analytique, les FEC seront sous le format FEC Analytique. Ce format est le format standard FEC (18 colonnes) où on vient ajouter 3 colonnes (axe, tag, valeur) par tag.
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/tra
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (formData)
+
+Nom du champ file
+
+Description
+Fichier TRA (accepte également un zip contenant le TRA)
+
+Réponse
+Content-type application/zip
+Transformation ISA en FEC
+Génération d'un fichier zip contenant les FEC par exercice contenu dans le ISA
+Si le TRA contient 3 exercices, le zip retourné contiendra trois FEC correspondants aux exercices. Le fichier ISA peut contenir de l'analytique et/ou des quantités ainsi les FEC seront sous le format FEC étendu. Ce format est le format standard FEC (18 colonnes) où on vient ajouter 3 colonnes (axe, tag, valeur) par tag et deux colonnes Quantite1 et Quantité2.
+
+v0.1 - 04/2021
+
+Ce format est reconnu par l'import FEC Inqom.
+
+URL {{URLBase}}/api/app/enterprises/{dossierId}/isa
+
+Method POST
+
+Paramètres (path)
+
+Nom du champ dossierId
+
+Description Id du dossier dans Inqom
+
+Paramètres (formData)
+
+Nom du champ file
+
+Description
+Fichier ISA (accepte également un zip contenant le ISA)
+
+Réponse
+Content-type application/zip
+Erreurs et Status codes
+Chaque requête Http recevra en retour un code de statut indiquant si la requête a pu s'effectuer correctement. Les codes de statut sont les suivants
+
+Code 200 400
+404
+
+Message ok bad request
+not found
+
+Signification
+la requête s'est bien effectuée
+la requête était mal formulée, un message d'erreur complémentaire explique parfois le problème
+l'url utilisée n'existe pas
+
+v0.1 - 04/2021
+
+403
+
+forbidden
+
+l'authentification n'a pas
+
+fonctionné. Vérifier si le
+
+token obtenu depuis
+
+l'endpoint authentification
+
+correspond bien à un
+
+utilisateur qui a des droits
+
+sur les ressources à
+
+récupérer
+
+500
+
+server error
+
+Erreur côté Inqom - si cela
+
+se reproduit veuillez
+
+contacter l'équipe
+
+Annexes
+
+FEC
+Le FEC est un fichier à plat de type texte (dont le séparateur de colonnes peut être la tabulation, le caractère ";" ou le caractère "|") ou au format Excel.
+
+Nom du champ JournalCode JournalLib EcritureNum
+EcritureDate CompteNum CompteLib CompAuxNum CompAuxLib PieceRef PieceDate EcritureLib Debit/Montant
+Credit/Sens
+
+Format
+
+Limites
+
+texte
+
+2 à 4 caractères.
+
+texte
+
+Facultatif. 100 caractères max
+
+texte
+
+Combiné avec JournalCode, le total ne doit pas dépasser 99 caractères.
+
+date
+
+Format AAAAMMJJ
+
+chiffres
+
+Facultatif. 32 caractères max
+
+texte
+
+Facultatif. 100 caractères max
+
+texte
+
+Facultatif. 32 caractères max
+
+texte
+
+Facultatif. Jusqu'à 100 caractères
+
+texte
+
+Facultatif. Jusqu'à 256 caractères
+
+date
+
+Facultatif. Format AAAAMMJJ
+
+texte
+
+Jusqu'à 256 caractères
+
+nombre
+
+Valeur maximale: 9 999 999 999,99 avec une précision de 2 chiffres après la virgule
+
+nombre ou Dans le mode Débit / Crédit, même règle que
+
+texte
+
+pour le champ Débit.
+
+v0.1 - 04/2021
+
+EcritureLet DateLet ValidDate Montantdevise
+Idevise
+
+texte date date nombre
+texte
+
+Dans le mode Montant / Sens: Pour indiquer un Débit il faut mentionner "1", "+1", ou bien "D" Pour indiquer un Crédit, il faut mentionner "-1" ou "C"
+Facultatif
+Facultatif. Format AAAAMMJJ
+Format AAAAMMJJ
+Facultatif. Valeur maximale: 9 999 999 999,99 avec une précision de 2 chiffres après la virgule
+Facultatif. Code ISO de la devise avec 3 caractères
+
+v0.1 - 04/2021
+
+FEC BNC
+Lors des opérations d'import / export FEC, on peut ajouter l'information concernant la nature des paiements sur chaque ligne. Le format est celui du FEC standard ayant 18 colonnes auquel on ajoute 4 colonnes supplémentaires:
+
+Nom du champ DateRglt
+ModeRglt NatOp IdClient
+
+Format date
+texte texte texte
+
+Limites
+Facultatif. Format AAAAMMJJ Si ce champ est omis, le reste des informations sur le paiement seront ignorées
+Facultatif
+Facultatif
+Facultatif
+
+v0.1 - 04/2021
+
+FEC avec Analytique
+Lors des opérations d'import / export FEC, on peut ajouter l'information analytique sur chaque ligne. Le format de base est celui du FEC standard ayant minimum 18 colonnes auquel on ajoute par groupe de trois colonnes (Axe, Tag et Valeur) les informations analytiques.
+Par exemple, si il y a un maximum de trois tags parmi les lignes d'écritures, il y aura neuf colonnes supplémentaires.
+La composition du groupe de colonnes :
+
+Nom du champ Axe Tag Valeur
+
+Format
+
+Limites
+
+texte
+
+450 caractères max
+
+texte
+
+nombre ou En mode nombre: Valeur maximale:
+
+%
+
+9 999 999 999,99 avec une précision de 2
+
+chiffres après la virgule
+
+En mode pourcentage: le caractère % doit être utilisé à la fin pour indiquer un pourcentage, ex : 100%
+
+Un axe ne peut pas contenir plus de 100% de la valeur de la ligne mais peut contenir moins de 100%.
+Exemple complet :
+
+v0.1 - 04/2021
+
+FEC avec Quantités
+Lors des opérations d'import / export FEC, on peut ajouter l'information des quantités sur chaque ligne. Le format de base est celui du FEC standard ayant minimum 18 colonnes auquel on ajoute deux colonnes Quantite1 et Quantite2.
+La quantité sera défini avec son unité, par exemple : "15kg" ou "1,35 litres". Une ligne ne pourra pas avoir deux quantités sur le même type d'unité. Par exemple : 500l et 15m3, qui sont tous les deux des unités de volumes, cela est interdit.
+
+Nom du champ Quantite1
+Quantite2
+
+Format texte
+texte
+
+Limites
+Facultatif. Le format est: <nombre> <unité> Exemples valides: 50 m, 50L, 50 kilo, 50 zzz. Nombre: valeur maximale de 9 999 999 999 999 999,99 avec une précision de 2 chiffres après la virgule
+Idem Quantite1
+
+v0.1 - 04/2021
+
+
